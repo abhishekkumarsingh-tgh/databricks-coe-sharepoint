@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Databricks CoE — SharePoint</title>
+<link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────────
+   TOKENS — Microsoft Fluent / SharePoint palette
+───────────────────────────────────────────── */
+:root {
+  /* Brand */
+  --brand:#1565C0;          /* SP blue */
+  --brand-dk:#0D47A1;
+  --brand-lt:#E8F0FE;
+  --brand-mid:#1976D2;
+  --db-red:#E53935;         /* Databricks red accent */
+  --db-red-lt:#FDECEA;
+  --db-red-md:#EF5350;
+
+  /* Neutrals */
+  --n0:#FFFFFF;
+  --n50:#F8F9FA;
+  --n100:#F1F3F4;
+  --n150:#EAECEF;
+  --n200:#DADCE0;
+  --n300:#BDC1C6;
+  --n400:#9AA0A6;
+  --n500:#5F6368;
+  --n600:#3C4043;
+  --n700:#202124;
+
+  /* Semantic */
+  --success:#1E8449;
+  --success-lt:#E8F5E9;
+  --warn:#F57F17;
+  --warn-lt:#FFF8E1;
+  --info:#0288D1;
+  --info-lt:#E1F5FE;
+  --danger:#C62828;
+  --danger-lt:#FFEBEE;
+
+  /* Surface */
+  --bg:#F3F2F1;             /* SP page grey */
+  --surface:#FFFFFF;
+  --surface2:#F8F9FA;
+  --sidebar-bg:#F3F2F1;
+  --topbar-bg:#FFFFFF;
+  --suiteBar:#1B1A19;       /* M365 suite bar */
+
+  /* Typography */
+  --font:'Segoe UI','Inter',system-ui,sans-serif;
+
+  /* Sizing */
+  --suite-h:40px;
+  --nav-h:48px;
+  --lnav-w:300px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
+  --shadow-md:0 4px 12px rgba(0,0,0,.10),0 2px 4px rgba(0,0,0,.06);
+  --shadow-lg:0 8px 24px rgba(0,0,0,.12),0 4px 8px rgba(0,0,0,.06);
+  --radius:6px;
+  --radius-lg:10px;
+}
+
+/* ─────────── RESET ─────────── */
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:var(--font);}
+body{background:var(--bg);color:var(--n700);display:flex;flex-direction:column;font-size:14px;line-height:1.5;}
+a{text-decoration:none;color:var(--brand);}
+a:hover{text-decoration:underline;}
+button{font-family:var(--font);cursor:pointer;}
+
+/* ═══════════════════════════════════════════
+   M365 SUITE BAR (top black bar)
+═══════════════════════════════════════════ */
+.suite-bar{
+  height:var(--suite-h);
+  background:var(--suiteBar);
+  display:flex;align-items:center;
+  padding:0 12px;gap:4px;
+  flex-shrink:0;z-index:300;
+}
+.sb-waffle{
+  width:32px;height:32px;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:#fff;font-size:18px;
+  background:transparent;border:none;
+  transition:background .15s;
+}
+.sb-waffle:hover{background:rgba(255,255,255,.1);}
+.sb-logo{
+  display:flex;align-items:center;gap:6px;
+  font-size:15px;font-weight:600;color:#fff;
+  padding:0 8px;letter-spacing:-.01em;
+}
+.sb-logo-dot{width:18px;height:18px;display:grid;grid-template-columns:1fr 1fr;gap:1.5px;}
+.sb-logo-dot span{border-radius:2px;background:#FF3621;}
+.sb-logo-dot span:nth-child(2){opacity:.55;}
+.sb-logo-dot span:nth-child(3){opacity:.4;}
+.sb-logo-dot span:nth-child(4){opacity:.2;}
+.sb-divider{width:1px;height:18px;background:rgba(255,255,255,.2);margin:0 6px;}
+.sb-site{font-size:14px;color:rgba(255,255,255,.85);font-weight:400;letter-spacing:-.01em;}
+.sb-right{margin-left:auto;display:flex;align-items:center;gap:4px;}
+.sb-icon-btn{
+  width:32px;height:32px;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  border:none;background:transparent;color:rgba(255,255,255,.75);
+  font-size:15px;cursor:pointer;transition:background .15s;
+}
+.sb-icon-btn:hover{background:rgba(255,255,255,.1);color:#fff;}
+.sb-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--db-red),#F57C00);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:600;color:#fff;cursor:pointer;
+  margin-left:4px;
+}
+.sb-search{
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);
+  border-radius:20px;padding:4px 14px 4px 32px;
+  color:#fff;font-size:13px;outline:none;
+  font-family:var(--font);width:220px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='rgba(255,255,255,.5)' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:10px center;
+}
+.sb-search::placeholder{color:rgba(255,255,255,.45);}
+
+/* ═══════════════════════════════════════════
+   SP SITE HEADER / NAV BAR
+═══════════════════════════════════════════ */
+.sp-navbar{
+  height:var(--nav-h);
+  background:var(--brand);
+  display:flex;align-items:center;
+  padding:0 16px;gap:2px;
+  flex-shrink:0;z-index:200;
+  box-shadow:0 2px 4px rgba(0,0,0,.15);
+}
+.sp-site-name{
+  font-size:17px;font-weight:600;color:#fff;
+  padding:0 12px;letter-spacing:-.02em;
+  white-space:nowrap;margin-right:8px;
+}
+.sp-nav-links{display:flex;align-items:center;gap:0;flex:1;}
+.sp-navlink{
+  color:rgba(255,255,255,.85);font-size:13px;font-weight:400;
+  padding:0 14px;height:var(--nav-h);
+  display:flex;align-items:center;
+  cursor:pointer;transition:all .15s;
+  border-bottom:3px solid transparent;
+  white-space:nowrap;
+}
+.sp-navlink:hover{background:rgba(255,255,255,.12);color:#fff;}
+.sp-navlink.active{color:#fff;border-bottom-color:rgba(255,255,255,.9);background:rgba(255,255,255,.1);}
+.sp-nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.sp-cmd-btn{
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
+  color:#fff;padding:5px 14px;border-radius:4px;
+  font-size:12px;font-weight:500;cursor:pointer;
+  display:flex;align-items:center;gap:6px;
+  transition:background .15s;font-family:var(--font);
+}
+.sp-cmd-btn:hover{background:rgba(255,255,255,.25);}
+.sp-cmd-btn.accent{background:var(--db-red);border-color:var(--db-red);}
+.sp-cmd-btn.accent:hover{background:#C62828;}
+
+/* ═══════════════════════════════════════════
+   APP BODY
+═══════════════════════════════════════════ */
+.app-body{display:flex;flex:1;overflow:hidden;}
+
+/* ═══════════════════════════════════════════
+   LEFT NAV (SP-style collapsible tree)
+═══════════════════════════════════════════ */
+.lnav{
+  width:var(--lnav-w);
+  background:var(--sidebar-bg);
+  border-right:1px solid var(--n200);
+  display:flex;flex-direction:column;
+  overflow:hidden;flex-shrink:0;
+}
+.lnav-inner{overflow-y:auto;flex:1;padding:12px 0 20px;}
+.lnav-inner::-webkit-scrollbar{width:4px;}
+.lnav-inner::-webkit-scrollbar-thumb{background:var(--n300);border-radius:2px;}
+
+/* Section group header */
+.lnav-group{margin-bottom:2px;}
+.lnav-group-hd{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 16px;
+  font-size:11px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:var(--n400);cursor:pointer;
+  user-select:none;
+  transition:color .15s;
+}
+.lnav-group-hd:hover{color:var(--n600);}
+.lnav-chevron{
+  margin-left:auto;font-size:10px;color:var(--n400);
+  transition:transform .2s;
+}
+.lnav-group.open .lnav-chevron{transform:rotate(90deg);}
+.lnav-group-items{display:none;}
+.lnav-group.open .lnav-group-items{display:block;}
+
+.lnav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:7px 16px 7px 20px;
+  font-size:13px;color:var(--n600);
+  cursor:pointer;transition:all .14s;
+  border-left:3px solid transparent;
+  border-radius:0;
+  user-select:none;
+  line-height:1.3;
+}
+.lnav-item:hover{background:var(--n150);color:var(--n700);}
+.lnav-item.active{
+  background:var(--brand-lt);
+  color:var(--brand-dk);font-weight:600;
+  border-left-color:var(--brand);
+}
+.lnav-item .li-num{
+  font-size:10px;color:var(--n400);
+  width:20px;flex-shrink:0;
+  font-variant-numeric:tabular-nums;
+  text-align:right;
+}
+.lnav-item.active .li-num{color:var(--brand);}
+.lnav-item .li-icon{
+  width:20px;text-align:center;font-size:14px;flex-shrink:0;
+}
+.lnav-item .li-label{flex:1;}
+
+/* Home item */
+.lnav-home{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 16px;
+  font-size:13px;font-weight:600;color:var(--n700);
+  cursor:pointer;transition:all .14s;
+  border-bottom:1px solid var(--n200);
+  margin-bottom:8px;
+}
+.lnav-home:hover{background:var(--n150);}
+.lnav-home.active{background:var(--brand-lt);color:var(--brand-dk);}
+.lnav-home .li-icon{font-size:16px;}
+
+/* Owner card */
+.lnav-footer{
+  padding:12px 16px;border-top:1px solid var(--n200);
+  flex-shrink:0;background:var(--n50);
+}
+.lf-label{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--n400);margin-bottom:8px;}
+.lf-person{display:flex;align-items:center;gap:8px;}
+.lf-avatar{width:30px;height:30px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+.lf-name{font-size:12px;font-weight:600;color:var(--n700);}
+.lf-role{font-size:11px;color:var(--n500);}
+
+/* ═══════════════════════════════════════════
+   MAIN CONTENT AREA
+═══════════════════════════════════════════ */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column;background:var(--bg);}
+.main::-webkit-scrollbar{width:8px;}
+.main::-webkit-scrollbar-thumb{background:var(--n300);border-radius:4px;}
+
+/* ── Page command bar (SharePoint "edit" strip) ── */
+.page-cmdbar{
+  height:40px;background:var(--surface);
+  border-bottom:1px solid var(--n200);
+  display:flex;align-items:center;padding:0 24px;gap:8px;
+  flex-shrink:0;
+}
+.pcb-breadcrumb{display:flex;align-items:center;gap:6px;flex:1;}
+.pcb-breadcrumb a,.pcb-breadcrumb span{font-size:12px;color:var(--n500);}
+.pcb-breadcrumb a{cursor:pointer;}
+.pcb-breadcrumb a:hover{color:var(--brand);text-decoration:none;}
+.pcb-sep{color:var(--n300);font-size:11px;}
+.pcb-current{color:var(--n700);font-weight:500;}
+.pcb-actions{display:flex;gap:6px;}
+.pcb-btn{
+  background:transparent;border:1px solid var(--n200);
+  color:var(--n600);padding:4px 12px;border-radius:4px;
+  font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;
+  transition:all .14s;font-family:var(--font);
+}
+.pcb-btn:hover{background:var(--n100);border-color:var(--n300);}
+.pcb-btn.primary{background:var(--brand);border-color:var(--brand);color:#fff;}
+.pcb-btn.primary:hover{background:var(--brand-dk);}
+
+/* ── Page content canvas ── */
+.page-canvas{flex:1;padding:24px 32px 48px;}
+
+/* ═══════════════════════════════════════════
+   SHAREPOINT WEB PARTS — Shared
+═══════════════════════════════════════════ */
+
+/* SP Banner / Hero web part */
+.wp-banner{
+  border-radius:var(--radius-lg);
+  overflow:hidden;margin-bottom:24px;
+  position:relative;min-height:220px;
+  display:flex;align-items:flex-end;
+  background:linear-gradient(135deg,var(--brand-dk) 0%,#1565C0 55%,#1A237E 100%);
+  box-shadow:var(--shadow-md);
+}
+.wp-banner.red-theme{background:linear-gradient(135deg,#B71C1C 0%,#C62828 50%,#D32F2F 100%);}
+.wp-banner.teal-theme{background:linear-gradient(135deg,#004D40 0%,#00695C 50%,#00796B 100%);}
+.wp-banner.amber-theme{background:linear-gradient(135deg,#E65100 0%,#EF6C00 50%,#F57F17 100%);}
+.wp-banner.indigo-theme{background:linear-gradient(135deg,#1A237E 0%,#283593 50%,#303F9F 100%);}
+.wp-banner.green-theme{background:linear-gradient(135deg,#1B5E20 0%,#2E7D32 50%,#388E3C 100%);}
+.wp-banner-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.35) 100%);
+}
+.wp-banner-pattern{
+  position:absolute;inset:0;
+  background-image:radial-gradient(circle at 75% 40%,rgba(255,255,255,.08) 0%,transparent 50%),
+                   linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
+  background-size:auto,40px 40px,40px 40px;
+}
+.wp-banner-content{position:relative;padding:28px 36px;z-index:2;width:100%;}
+.wbc-eyebrow{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.15);backdrop-filter:blur(4px);
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:20px;padding:3px 12px;
+  font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:rgba(255,255,255,.9);margin-bottom:12px;
+}
+.wbc-title{
+  font-size:26px;font-weight:700;color:#fff;
+  line-height:1.2;margin-bottom:8px;letter-spacing:-.02em;
+}
+.wbc-desc{font-size:13px;color:rgba(255,255,255,.8);max-width:580px;line-height:1.6;}
+.wbc-meta{margin-top:16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.wbc-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);
+  border-radius:20px;padding:4px 12px;font-size:11px;color:rgba(255,255,255,.9);
+}
+.wbc-actions{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;}
+.wbc-btn{
+  padding:8px 20px;border-radius:var(--radius);font-size:13px;font-weight:500;
+  cursor:pointer;border:none;font-family:var(--font);transition:all .18s;
+}
+.wbc-btn.solid{background:#fff;color:var(--brand-dk);}
+.wbc-btn.solid:hover{background:var(--n100);}
+.wbc-btn.outline{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;}
+.wbc-btn.outline:hover{background:rgba(255,255,255,.2);}
+
+/* Stat strip */
+.wp-stat-strip{
+  display:grid;gap:12px;margin-bottom:24px;
+}
+.wp-stat-strip.cols-4{grid-template-columns:repeat(4,1fr);}
+.wp-stat-strip.cols-5{grid-template-columns:repeat(5,1fr);}
+.stat-tile{
+  background:var(--surface);border:1px solid var(--n200);
+  border-radius:var(--radius-lg);padding:18px 20px;
+  box-shadow:var(--shadow-sm);
+  display:flex;flex-direction:column;gap:4px;
+}
+.stat-tile-val{font-size:28px;font-weight:700;line-height:1;letter-spacing:-.02em;}
+.stat-tile-val.brand{color:var(--brand);}
+.stat-tile-val.red{color:var(--db-red);}
+.stat-tile-val.green{color:var(--success);}
+.stat-tile-val.amber{color:var(--warn);}
+.stat-tile-val.info{color:var(--info);}
+.stat-tile-label{font-size:12px;color:var(--n500);font-weight:400;}
+.stat-tile-trend{font-size:11px;font-weight:500;margin-top:2px;}
+.stat-tile-trend.up{color:var(--success);}
+.stat-tile-trend.dn{color:var(--danger);}
+
+/* Section heading */
+.wp-section-hd{
+  font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--n500);margin-bottom:12px;margin-top:4px;
+  display:flex;align-items:center;gap:10px;
+}
+.wp-section-hd::after{content:'';flex:1;height:1px;background:var(--n200);}
+.wp-section-title{
+  font-size:18px;font-weight:600;color:var(--n700);
+  margin-bottom:6px;letter-spacing:-.01em;
+}
+.wp-section-sub{font-size:13px;color:var(--n500);margin-bottom:16px;}
+
+/* Card Grid */
+.wp-card-grid{display:grid;gap:14px;margin-bottom:24px;}
+.wp-card-grid.c2{grid-template-columns:repeat(2,1fr);}
+.wp-card-grid.c3{grid-template-columns:repeat(3,1fr);}
+.wp-card-grid.c4{grid-template-columns:repeat(4,1fr);}
+
+.sp-card{
+  background:var(--surface);border:1px solid var(--n200);
+  border-radius:var(--radius-lg);padding:20px;
+  box-shadow:var(--shadow-sm);
+  transition:all .2s;cursor:pointer;
+  display:flex;flex-direction:column;gap:0;
+}
+.sp-card:hover{
+  box-shadow:var(--shadow-md);
+  transform:translateY(-2px);
+  border-color:var(--n300);
+}
+.sp-card-icon{
+  width:40px;height:40px;border-radius:var(--radius);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;margin-bottom:12px;flex-shrink:0;
+}
+.ic-blue{background:#E3F2FD;}
+.ic-red{background:#FDECEA;}
+.ic-green{background:#E8F5E9;}
+.ic-amber{background:#FFF8E1;}
+.ic-purple{background:#F3E5F5;}
+.ic-teal{background:#E0F2F1;}
+.ic-indigo{background:#E8EAF6;}
+.sp-card-title{font-size:14px;font-weight:600;color:var(--n700);margin-bottom:6px;line-height:1.3;}
+.sp-card-desc{font-size:12px;color:var(--n500);line-height:1.55;flex:1;}
+.sp-card-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  padding-top:12px;margin-top:12px;border-top:1px solid var(--n150);
+}
+.sp-card-link{font-size:12px;font-weight:500;color:var(--brand);display:flex;align-items:center;gap:4px;}
+.sp-card-badge{font-size:10px;}
+
+/* Featured card (wider) */
+.sp-card.featured{
+  grid-column:1/-1;
+  flex-direction:row;align-items:center;gap:24px;padding:24px 28px;
+}
+.sp-card.featured .sp-card-icon{width:56px;height:56px;font-size:28px;}
+.sp-card.featured .sp-card-title{font-size:16px;}
+.sp-card.featured .sp-card-desc{font-size:13px;max-width:580px;}
+
+/* Document / file table */
+.sp-doc-table{
+  width:100%;background:var(--surface);border:1px solid var(--n200);
+  border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);
+  overflow:hidden;margin-bottom:24px;
+}
+.sdt-header{
+  display:grid;padding:10px 16px;
+  background:var(--n50);border-bottom:1px solid var(--n200);
+  font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--n500);
+}
+.sdt-row{
+  display:grid;padding:12px 16px;border-bottom:1px solid var(--n100);
+  align-items:center;transition:background .12s;cursor:pointer;
+}
+.sdt-row:last-child{border-bottom:none;}
+.sdt-row:hover{background:var(--n50);}
+.sdt-cols-4{grid-template-columns:1fr 140px 120px 120px;}
+.sdt-cols-5{grid-template-columns:1fr 140px 120px 100px 100px;}
+.sdt-name{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;color:var(--n700);}
+.sdt-name-icon{font-size:16px;}
+.sdt-cell{font-size:12px;color:var(--n600);}
+.sdt-link{font-size:12px;color:var(--brand);font-weight:500;}
+
+/* Badge / chip */
+.badge{
+  display:inline-flex;align-items:center;padding:2px 9px;
+  border-radius:12px;font-size:10px;font-weight:600;
+  letter-spacing:.04em;text-transform:uppercase;
+}
+.badge.blue{background:#E3F2FD;color:#1565C0;}
+.badge.red{background:#FDECEA;color:#C62828;}
+.badge.green{background:#E8F5E9;color:#1E8449;}
+.badge.amber{background:#FFF8E1;color:#E65100;}
+.badge.purple{background:#F3E5F5;color:#6A1B9A;}
+.badge.teal{background:#E0F2F1;color:#00695C;}
+.badge.gray{background:#F1F3F4;color:#5F6368;}
+.badge.indigo{background:#E8EAF6;color:#283593;}
+
+/* Progress bars */
+.wp-progress-list{background:var(--surface);border:1px solid var(--n200);border-radius:var(--radius-lg);padding:20px 24px;box-shadow:var(--shadow-sm);margin-bottom:24px;}
+.wp-prog-item{margin-bottom:16px;}
+.wp-prog-item:last-child{margin-bottom:0;}
+.wp-prog-hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+.wp-prog-label{font-size:13px;color:var(--n700);font-weight:500;}
+.wp-prog-pct{font-size:13px;font-weight:700;color:var(--n700);}
+.wp-prog-bar{height:8px;background:var(--n150);border-radius:4px;overflow:hidden;}
+.wp-prog-fill{height:100%;border-radius:4px;transition:width 1s ease;}
+
+/* News / announcement cards */
+.wp-news-list{display:flex;flex-direction:column;gap:12px;margin-bottom:24px;}
+.news-card{
+  background:var(--surface);border:1px solid var(--n200);
+  border-radius:var(--radius-lg);padding:16px 18px;
+  display:flex;gap:16px;cursor:pointer;
+  box-shadow:var(--shadow-sm);transition:all .18s;
+}
+.news-card:hover{box-shadow:var(--shadow-md);border-color:var(--n300);}
+.news-card-thumb{
+  width:48px;height:48px;border-radius:var(--radius);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;
+}
+.news-card-body{flex:1;}
+.nc-meta{font-size:11px;color:var(--n500);margin-bottom:4px;}
+.nc-meta .nc-cat{color:var(--brand);font-weight:600;}
+.nc-title{font-size:13px;font-weight:600;color:var(--n700);line-height:1.4;}
+.nc-desc{font-size:12px;color:var(--n500);margin-top:3px;line-height:1.4;}
+
+/* Two-col layout */
+.wp-2col{display:grid;grid-template-columns:1fr 300px;gap:20px;margin-bottom:24px;}
+.wp-2col.wide-right{grid-template-columns:1fr 360px;}
+
+/* People / team card */
+.wp-people-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.person-card{
+  background:var(--surface);border:1px solid var(--n200);
+  border-radius:var(--radius-lg);padding:18px 16px;text-align:center;
+  box-shadow:var(--shadow-sm);transition:all .18s;cursor:pointer;
+}
+.person-card:hover{box-shadow:var(--shadow-md);}
+.person-avatar{
+  width:52px;height:52px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:700;color:#fff;
+  margin:0 auto 10px;
+}
+.person-name{font-size:13px;font-weight:600;color:var(--n700);margin-bottom:2px;}
+.person-role{font-size:11px;color:var(--n500);}
+
+/* Checklist */
+.wp-checklist{background:var(--surface);border:1px solid var(--n200);border-radius:var(--radius-lg);padding:20px 24px;box-shadow:var(--shadow-sm);margin-bottom:24px;}
+.wc-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--n100);}
+.wc-item:last-child{border-bottom:none;}
+.wc-check{
+  width:20px;height:20px;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;flex-shrink:0;margin-top:1px;
+}
+.wc-check.done{background:var(--success);color:#fff;}
+.wc-check.pending{background:#fff;border:2px solid var(--n300);color:transparent;}
+.wc-body{flex:1;}
+.wc-title{font-size:13px;font-weight:500;color:var(--n700);}
+.wc-sub{font-size:11px;color:var(--n500);margin-top:2px;}
+
+/* Timeline */
+.wp-timeline{margin-bottom:24px;}
+.tl-item{display:flex;gap:16px;padding-bottom:20px;position:relative;}
+.tl-item::before{content:'';position:absolute;left:15px;top:30px;bottom:0;width:2px;background:var(--n200);}
+.tl-item:last-child::before{display:none;}
+.tl-dot{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;flex-shrink:0;border:2px solid;
+}
+.tl-dot.done{background:var(--success-lt);border-color:var(--success);}
+.tl-dot.active{background:var(--warn-lt);border-color:var(--warn);}
+.tl-dot.pending{background:var(--n50);border-color:var(--n300);}
+.tl-body{padding-top:6px;}
+.tl-title{font-size:13px;font-weight:600;color:var(--n700);}
+.tl-desc{font-size:12px;color:var(--n500);margin-top:3px;}
+
+/* Alert / announcement banner */
+.wp-alert{
+  border-radius:var(--radius-lg);padding:14px 18px;
+  display:flex;align-items:center;gap:14px;margin-bottom:20px;
+  border:1px solid;
+}
+.wp-alert.info{background:var(--info-lt);border-color:#81D4FA;}
+.wp-alert.warn{background:var(--warn-lt);border-color:#FFCC02;}
+.wp-alert.success{background:var(--success-lt);border-color:#A5D6A7;}
+.wp-alert-icon{font-size:18px;flex-shrink:0;}
+.wp-alert-body{flex:1;font-size:13px;color:var(--n700);}
+.wp-alert-body strong{font-weight:600;}
+.wp-alert-action{font-size:12px;font-weight:600;color:var(--brand);white-space:nowrap;cursor:pointer;}
+
+/* Quick-link bar */
+.wp-quicklinks{
+  background:var(--surface);border:1px solid var(--n200);
+  border-radius:var(--radius-lg);padding:16px 20px;
+  box-shadow:var(--shadow-sm);margin-bottom:24px;
+}
+.wql-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.wql-item{
+  display:flex;align-items:center;gap:8px;
+  background:var(--n50);border:1px solid var(--n200);
+  border-radius:var(--radius);padding:7px 14px;
+  font-size:13px;color:var(--n600);cursor:pointer;
+  transition:all .16s;
+}
+.wql-item:hover{background:var(--brand-lt);border-color:var(--brand);color:var(--brand-dk);}
+.wql-icon{font-size:14px;}
+
+/* Page nav tiles (home) */
+.nav-tile-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.nav-tile{
+  background:var(--surface);border:1px solid var(--n200);
+  border-radius:var(--radius-lg);padding:18px 16px;
+  cursor:pointer;transition:all .2s;
+  display:flex;flex-direction:column;gap:6px;
+  box-shadow:var(--shadow-sm);
+}
+.nav-tile:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);border-color:var(--n300);}
+.nav-tile:hover .nt-title{color:var(--brand);}
+.nt-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.nt-icon{font-size:22px;}
+.nt-num{font-size:10px;color:var(--n400);font-weight:600;background:var(--n100);padding:2px 6px;border-radius:4px;}
+.nt-title{font-size:13px;font-weight:600;color:var(--n700);line-height:1.3;}
+.nt-desc{font-size:11px;color:var(--n500);line-height:1.4;}
+
+/* Right rail */
+.right-rail{display:flex;flex-direction:column;gap:16px;}
+.rail-card{
+  background:var(--surface);border:1px solid var(--n200);
+  border-radius:var(--radius-lg);padding:16px;
+  box-shadow:var(--shadow-sm);
+}
+.rc-title{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--n500);margin-bottom:12px;}
+.rc-event{display:flex;gap:12px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--n100);}
+.rc-event:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+.rc-date{
+  background:var(--brand-lt);border:1px solid #BBDEFB;
+  border-radius:var(--radius);padding:6px 8px;text-align:center;
+  min-width:44px;flex-shrink:0;
+}
+.rc-day{font-size:18px;font-weight:700;color:var(--brand-dk);line-height:1;}
+.rc-month{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--brand);letter-spacing:.06em;}
+.rc-event-name{font-size:12px;font-weight:600;color:var(--n700);}
+.rc-event-time{font-size:11px;color:var(--n500);margin-top:2px;}
+
+/* Engagement tier cards */
+.tier-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
+.tier-card{
+  background:var(--surface);border:1px solid var(--n200);
+  border-radius:var(--radius-lg);padding:20px;
+  box-shadow:var(--shadow-sm);border-top:4px solid;
+}
+.tier-card.green-top{border-top-color:var(--success);}
+.tier-card.amber-top{border-top-color:var(--warn);}
+.tier-card.red-top{border-top-color:var(--db-red);}
+.tc-icon{font-size:28px;margin-bottom:10px;}
+.tc-title{font-size:15px;font-weight:700;color:var(--n700);margin-bottom:6px;}
+.tc-desc{font-size:13px;color:var(--n500);line-height:1.5;}
+
+/* Page hidden by default */
+.page{display:none;}
+.page.active{display:block;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════
+     M365 SUITE BAR
+═══════════════════════════════════ -->
+<div class="suite-bar">
+  <button class="sb-waffle">⠿</button>
+  <div class="sb-logo">
+    <div class="sb-logo-dot"><span></span><span></span><span></span><span></span></div>
+    SharePoint
+  </div>
+  <div class="sb-divider"></div>
+  <span class="sb-site">TGH</span>
+  <div style="margin-left:16px;">
+    <input class="sb-search" placeholder="Search SharePoint…">
+  </div>
+  <div class="sb-right">
+    <button class="sb-icon-btn" title="Settings">⚙</button>
+    <button class="sb-icon-btn" title="Help">?</button>
+    <button class="sb-icon-btn" title="Notifications">🔔</button>
+    <div class="sb-avatar" title="Sarah Roberts">SR</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     SP SITE NAVIGATION BAR
+═══════════════════════════════════ -->
+<div class="sp-navbar">
+  <span class="sp-site-name">Databricks CoE</span>
+  <nav class="sp-nav-links">
+    <span class="sp-navlink active" onclick="showPage('home')">Home</span>
+    <span class="sp-navlink" onclick="showPage('about')">About CoE</span>
+    <span class="sp-navlink" onclick="showPage('knowledge')">Knowledge Base</span>
+    <span class="sp-navlink" onclick="showPage('training')">Training</span>
+    <span class="sp-navlink" onclick="showPage('accelerators')">Assets &amp; Tools</span>
+    <span class="sp-navlink" onclick="showPage('metrics')">Dashboard</span>
+  </nav>
+  <div class="sp-nav-right">
+    <button class="sp-cmd-btn" onclick="showPage('about')">📋 Engage CoE</button>
+    <button class="sp-cmd-btn accent" onclick="showPage('operations')">🎟 Submit Request</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     APP BODY
+═══════════════════════════════════ -->
+<div class="app-body">
+
+<!-- ── LEFT NAVIGATION ── -->
+<nav class="lnav">
+  <div class="lnav-inner">
+    <div class="lnav-home active" id="lnav-home" onclick="showPage('home')">
+      <span class="li-icon">🏠</span>
+      <span>CoE Home</span>
+    </div>
+
+    <!-- Group: Getting Started -->
+    <div class="lnav-group open" id="grp-start">
+      <div class="lnav-group-hd" onclick="toggleGroup('grp-start')">
+        Getting Started <span class="lnav-chevron">▶</span>
+      </div>
+      <div class="lnav-group-items">
+        <div class="lnav-item" onclick="showPage('about')"><span class="li-num">01</span><span class="li-icon">ℹ️</span><span class="li-label">About CoE &amp; Engagement</span></div>
+        <div class="lnav-item" onclick="showPage('fundamentals')"><span class="li-num">02</span><span class="li-icon">⚡</span><span class="li-label">Azure Databricks Fundamentals</span></div>
+        <div class="lnav-item" onclick="showPage('training')"><span class="li-num">03</span><span class="li-icon">🎓</span><span class="li-label">Training &amp; Certification</span></div>
+      </div>
+    </div>
+
+    <!-- Group: Sales & Pre-Sales -->
+    <div class="lnav-group open" id="grp-sales">
+      <div class="lnav-group-hd" onclick="toggleGroup('grp-sales')">
+        Sales &amp; Pre-Sales <span class="lnav-chevron">▶</span>
+      </div>
+      <div class="lnav-group-items">
+        <div class="lnav-item" onclick="showPage('presales')"><span class="li-num">04</span><span class="li-icon">💼</span><span class="li-label">Pre-Sales &amp; Solution Eng.</span></div>
+        <div class="lnav-item" onclick="showPage('sales')"><span class="li-num">05</span><span class="li-icon">📈</span><span class="li-label">Sales Enablement</span></div>
+      </div>
+    </div>
+
+    <!-- Group: Delivery -->
+    <div class="lnav-group open" id="grp-delivery">
+      <div class="lnav-group-hd" onclick="toggleGroup('grp-delivery')">
+        Delivery <span class="lnav-chevron">▶</span>
+      </div>
+      <div class="lnav-group-items">
+        <div class="lnav-item" onclick="showPage('delivery')"><span class="li-num">06</span><span class="li-icon">🚀</span><span class="li-label">Delivery &amp; Implementation</span></div>
+        <div class="lnav-item" onclick="showPage('greenfield')"><span class="li-num">07</span><span class="li-icon">🌱</span><span class="li-label">Greenfield Implementation Kit</span></div>
+        <div class="lnav-item" onclick="showPage('migration')"><span class="li-num">08</span><span class="li-icon">🔄</span><span class="li-label">Migration Factory</span></div>
+      </div>
+    </div>
+
+    <!-- Group: Platform Engineering -->
+    <div class="lnav-group open" id="grp-eng">
+      <div class="lnav-group-hd" onclick="toggleGroup('grp-eng')">
+        Platform Engineering <span class="lnav-chevron">▶</span>
+      </div>
+      <div class="lnav-group-items">
+        <div class="lnav-item" onclick="showPage('devops')"><span class="li-num">09</span><span class="li-icon">⚙️</span><span class="li-label">DevOps &amp; Eng. Standards</span></div>
+        <div class="lnav-item" onclick="showPage('security')"><span class="li-num">10</span><span class="li-icon">🔐</span><span class="li-label">Security &amp; Governance</span></div>
+        <div class="lnav-item" onclick="showPage('operations')"><span class="li-num">11</span><span class="li-icon">🛠️</span><span class="li-label">Operations &amp; Support</span></div>
+        <div class="lnav-item" onclick="showPage('finops')"><span class="li-num">12</span><span class="li-icon">💰</span><span class="li-label">Cost Optimization &amp; FinOps</span></div>
+      </div>
+    </div>
+
+    <!-- Group: Assets & Innovation -->
+    <div class="lnav-group open" id="grp-assets">
+      <div class="lnav-group-hd" onclick="toggleGroup('grp-assets')">
+        Assets &amp; Innovation <span class="lnav-chevron">▶</span>
+      </div>
+      <div class="lnav-group-items">
+        <div class="lnav-item" onclick="showPage('accelerators')"><span class="li-num">13</span><span class="li-icon">🧩</span><span class="li-label">Accelerators &amp; Reusable Assets</span></div>
+        <div class="lnav-item" onclick="showPage('industry')"><span class="li-num">14</span><span class="li-icon">🏭</span><span class="li-label">Industry Solutions</span></div>
+        <div class="lnav-item" onclick="showPage('innovation')"><span class="li-num">15</span><span class="li-icon">🔬</span><span class="li-label">Innovation Lab</span></div>
+      </div>
+    </div>
+
+    <!-- Group: Community & Metrics -->
+    <div class="lnav-group open" id="grp-community">
+      <div class="lnav-group-hd" onclick="toggleGroup('grp-community')">
+        Community &amp; Metrics <span class="lnav-chevron">▶</span>
+      </div>
+      <div class="lnav-group-items">
+        <div class="lnav-item" onclick="showPage('knowledge')"><span class="li-num">16</span><span class="li-icon">📚</span><span class="li-label">Knowledge Base &amp; Community</span></div>
+        <div class="lnav-item" onclick="showPage('metrics')"><span class="li-num">17</span><span class="li-icon">📊</span><span class="li-label">Practice Metrics Dashboard</span></div>
+      </div>
+    </div>
+
+  </div>
+  <div class="lnav-footer">
+    <div class="lf-label">CoE Ownership</div>
+    <div class="lf-person">
+      <div class="lf-avatar">SR</div>
+      <div><div class="lf-name">SR</div><div class="lf-role">CoE Lead · Platform Architect</div></div>
+    </div>
+  </div>
+</nav>
+
+<!-- ── MAIN CONTENT ── -->
+<div class="main" id="main-scroll">
+
+  <!-- PAGE COMMAND BAR -->
+  <div class="page-cmdbar">
+    <div class="pcb-breadcrumb">
+      <a onclick="showPage('home')">Databricks CoE</a>
+      <span class="pcb-sep">›</span>
+      <span class="pcb-current" id="bc-current">Home</span>
+    </div>
+    <div class="pcb-actions">
+      <button class="pcb-btn">📌 Follow</button>
+      <button class="pcb-btn">↗ Share</button>
+      <button class="pcb-btn">⋯ More</button>
+      <button class="pcb-btn primary">✎ Edit</button>
+    </div>
+  </div>
+
+  <div class="page-canvas">
+
+  <!-- ══════════════════════════════════════════════════════════
+       PAGE: HOME
+  ══════════════════════════════════════════════════════════ -->
+  <div class="page active" id="page-home">
+
+    <!-- Banner -->
+    <div class="wp-banner" style="background:linear-gradient(135deg,#1A237E 0%,#1565C0 55%,#0288D1 100%);">
+      <div class="wp-banner-overlay"></div>
+      <div class="wp-banner-pattern"></div>
+      <div class="wp-banner-content">
+        <div class="wbc-eyebrow">⚡ Databricks Center of Excellence</div>
+        <div class="wbc-title">Data &amp; AI Practice Hub</div>
+        <div class="wbc-desc">Your single source of truth for standards, playbooks, assets, training, and community — enabling every team to build on Databricks with confidence.</div>
+        <div class="wbc-meta">
+          <div class="wbc-pill">📁 17 Practice Sections</div>
+          <div class="wbc-pill">📦 140+ Assets</div>
+          <div class="wbc-pill">🎓 34 Courses</div>
+          <div class="wbc-pill">👥 1,200+ Members</div>
+        </div>
+        <div class="wbc-actions">
+          <button class="wbc-btn solid" onclick="showPage('about')">Get Started</button>
+          <button class="wbc-btn outline" onclick="showPage('metrics')">View Metrics Dashboard</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert -->
+    <div class="wp-alert warn">
+      <span class="wp-alert-icon">📢</span>
+      <div class="wp-alert-body"><strong>New — Greenfield Kit v2.0:</strong> Terraform modules, Unity Catalog bootstrap scripts &amp; 3 new reference architectures are now available.</div>
+      <span class="wp-alert-action" onclick="showPage('greenfield')">View Kit →</span>
+    </div>
+
+    <!-- Stat strip -->
+    <div class="wp-stat-strip cols-5">
+      <div class="stat-tile"><div class="stat-tile-val brand">17</div><div class="stat-tile-label">Practice Areas</div></div>
+      <div class="stat-tile"><div class="stat-tile-val brand">140+</div><div class="stat-tile-label">Assets &amp; Templates</div><div class="stat-tile-trend up">↑ 12 this quarter</div></div>
+      <div class="stat-tile"><div class="stat-tile-val green">47</div><div class="stat-tile-label">Active Projects</div><div class="stat-tile-trend up">↑ 8 vs last month</div></div>
+      <div class="stat-tile"><div class="stat-tile-val amber">98.4%</div><div class="stat-tile-label">Platform Uptime</div></div>
+      <div class="stat-tile"><div class="stat-tile-val red">34</div><div class="stat-tile-label">Training Courses</div></div>
+    </div>
+
+    <!-- Quick links -->
+    <div class="wp-quicklinks">
+      <div class="wp-section-hd">Quick Links</div>
+      <div class="wql-grid">
+        <div class="wql-item" onclick="showPage('greenfield')"><span class="wql-icon">📐</span> Architecture Guide</div>
+        <div class="wql-item" onclick="showPage('security')"><span class="wql-icon">🔐</span> Security Standards</div>
+        <div class="wql-item" onclick="showPage('training')"><span class="wql-icon">🎓</span> Training Catalog</div>
+        <div class="wql-item" onclick="showPage('greenfield')"><span class="wql-icon">✅</span> Onboarding Checklist</div>
+        <div class="wql-item" onclick="showPage('metrics')"><span class="wql-icon">📊</span> Usage Dashboard</div>
+        <div class="wql-item" onclick="showPage('accelerators')"><span class="wql-icon">🧩</span> Template Library</div>
+        <div class="wql-item" onclick="showPage('knowledge')"><span class="wql-icon">💬</span> Community Slack</div>
+        <div class="wql-item" onclick="showPage('operations')"><span class="wql-icon">🎟</span> Submit Request</div>
+      </div>
+    </div>
+
+    <!-- Main + right rail -->
+    <div class="wp-2col wide-right">
+      <div>
+        <div class="wp-section-hd">All Practice Sections</div>
+        <div class="nav-tile-grid">
+          <div class="nav-tile" onclick="showPage('about')"><div class="nt-top"><span class="nt-icon">ℹ️</span><span class="nt-num">01</span></div><div class="nt-title">About CoE &amp; Engagement</div><div class="nt-desc">Charter, team, governance &amp; how to engage</div></div>
+          <div class="nav-tile" onclick="showPage('fundamentals')"><div class="nt-top"><span class="nt-icon">⚡</span><span class="nt-num">02</span></div><div class="nt-title">Azure Databricks Fundamentals</div><div class="nt-desc">Core concepts, architecture &amp; platform</div></div>
+          <div class="nav-tile" onclick="showPage('training')"><div class="nt-top"><span class="nt-icon">🎓</span><span class="nt-num">03</span></div><div class="nt-title">Training &amp; Certification</div><div class="nt-desc">Learning paths, courses &amp; cert tracking</div></div>
+          <div class="nav-tile" onclick="showPage('presales')"><div class="nt-top"><span class="nt-icon">💼</span><span class="nt-num">04</span></div><div class="nt-title">Pre-Sales &amp; Solution Eng.</div><div class="nt-desc">RFP support, demos, PoC &amp; SOWs</div></div>
+          <div class="nav-tile" onclick="showPage('sales')"><div class="nt-top"><span class="nt-icon">📈</span><span class="nt-num">05</span></div><div class="nt-title">Sales Enablement</div><div class="nt-desc">Pitch decks, battlecards &amp; ROI tools</div></div>
+          <div class="nav-tile" onclick="showPage('delivery')"><div class="nt-top"><span class="nt-icon">🚀</span><span class="nt-num">06</span></div><div class="nt-title">Delivery &amp; Implementation</div><div class="nt-desc">Playbooks, templates &amp; RACI</div></div>
+          <div class="nav-tile" onclick="showPage('greenfield')"><div class="nt-top"><span class="nt-icon">🌱</span><span class="nt-num">07</span></div><div class="nt-title">Greenfield Implementation Kit</div><div class="nt-desc">IaC, bootstrap &amp; reference architectures</div></div>
+          <div class="nav-tile" onclick="showPage('migration')"><div class="nt-top"><span class="nt-icon">🔄</span><span class="nt-num">08</span></div><div class="nt-title">Migration Factory</div><div class="nt-desc">Legacy platform migration frameworks</div></div>
+          <div class="nav-tile" onclick="showPage('devops')"><div class="nt-top"><span class="nt-icon">⚙️</span><span class="nt-num">09</span></div><div class="nt-title">DevOps &amp; Eng. Standards</div><div class="nt-desc">CI/CD, branching &amp; code quality</div></div>
+          <div class="nav-tile" onclick="showPage('security')"><div class="nt-top"><span class="nt-icon">🔐</span><span class="nt-num">10</span></div><div class="nt-title">Security &amp; Governance</div><div class="nt-desc">Unity Catalog, access &amp; compliance</div></div>
+          <div class="nav-tile" onclick="showPage('operations')"><div class="nt-top"><span class="nt-icon">🛠️</span><span class="nt-num">11</span></div><div class="nt-title">Operations &amp; Support</div><div class="nt-desc">Runbooks, incidents &amp; SLAs</div></div>
+          <div class="nav-tile" onclick="showPage('finops')"><div class="nt-top"><span class="nt-icon">💰</span><span class="nt-num">12</span></div><div class="nt-title">Cost Optimization &amp; FinOps</div><div class="nt-desc">DBU management &amp; cost governance</div></div>
+          <div class="nav-tile" onclick="showPage('accelerators')"><div class="nt-top"><span class="nt-icon">🧩</span><span class="nt-num">13</span></div><div class="nt-title">Accelerators &amp; Reusable Assets</div><div class="nt-desc">Notebooks, libraries &amp; accelerators</div></div>
+          <div class="nav-tile" onclick="showPage('industry')"><div class="nt-top"><span class="nt-icon">🏭</span><span class="nt-num">14</span></div><div class="nt-title">Industry Solutions</div><div class="nt-desc">Vertical reference solutions</div></div>
+          <div class="nav-tile" onclick="showPage('innovation')"><div class="nt-top"><span class="nt-icon">🔬</span><span class="nt-num">15</span></div><div class="nt-title">Innovation Lab</div><div class="nt-desc">Emerging tech &amp; PoC projects</div></div>
+          <div class="nav-tile" onclick="showPage('knowledge')"><div class="nt-top"><span class="nt-icon">📚</span><span class="nt-num">16</span></div><div class="nt-title">Knowledge Base &amp; Community</div><div class="nt-desc">Articles, Q&amp;A &amp; expert directory</div></div>
+          <div class="nav-tile" onclick="showPage('metrics')"><div class="nt-top"><span class="nt-icon">📊</span><span class="nt-num">17</span></div><div class="nt-title">Practice Metrics Dashboard</div><div class="nt-desc">KPIs, adoption &amp; practice health</div></div>
+        </div>
+      </div>
+
+      <!-- Right rail -->
+      <div class="right-rail">
+        <div class="rail-card">
+          <div class="rc-title">📅 Upcoming Events</div>
+          <div class="rc-event">
+            <div class="rc-date"><div class="rc-day">12</div><div class="rc-month">Mar</div></div>
+            <div><div class="rc-event-name">CoE Office Hours</div><div class="rc-event-time">10:00–11:00 AM · Teams</div></div>
+          </div>
+          <div class="rc-event">
+            <div class="rc-date"><div class="rc-day">18</div><div class="rc-month">Mar</div></div>
+            <div><div class="rc-event-name">DLT Workshop: Hands-On Lab</div><div class="rc-event-time">2:00–4:00 PM · Virtual</div></div>
+          </div>
+          <div class="rc-event">
+            <div class="rc-date"><div class="rc-day">25</div><div class="rc-month">Mar</div></div>
+            <div><div class="rc-event-name">Quarterly Governance Review</div><div class="rc-event-time">9:00 AM · Conf Room B</div></div>
+          </div>
+          <div class="rc-event">
+            <div class="rc-date"><div class="rc-day">2</div><div class="rc-month">Apr</div></div>
+            <div><div class="rc-event-name">Data Summit Prep Sync</div><div class="rc-event-time">1:00–2:00 PM · Teams</div></div>
+          </div>
+        </div>
+        <div class="rail-card">
+          <div class="rc-title">📈 Adoption Snapshot</div>
+          <div class="wp-prog-item" style="margin-bottom:12px">
+            <div class="wp-prog-hd"><span class="wp-prog-label" style="font-size:12px">Unity Catalog</span><span class="wp-prog-pct" style="font-size:12px;color:var(--brand)">74%</span></div>
+            <div class="wp-prog-bar"><div class="wp-prog-fill" style="width:74%;background:var(--brand)"></div></div>
+          </div>
+          <div class="wp-prog-item" style="margin-bottom:12px">
+            <div class="wp-prog-hd"><span class="wp-prog-label" style="font-size:12px">Cluster Policies</span><span class="wp-prog-pct" style="font-size:12px;color:var(--success)">88%</span></div>
+            <div class="wp-prog-bar"><div class="wp-prog-fill" style="width:88%;background:var(--success)"></div></div>
+          </div>
+          <div class="wp-prog-item">
+            <div class="wp-prog-hd"><span class="wp-prog-label" style="font-size:12px">DLT Adoption</span><span class="wp-prog-pct" style="font-size:12px;color:var(--warn)">42%</span></div>
+            <div class="wp-prog-bar"><div class="wp-prog-fill" style="width:42%;background:var(--warn)"></div></div>
+          </div>
+          <div style="margin-top:10px;text-align:right"><span class="sp-card-link" onclick="showPage('metrics')" style="font-size:12px;color:var(--brand);cursor:pointer">Full dashboard →</span></div>
+        </div>
+        <div class="rail-card">
+          <div class="rc-title">👥 CoE Team</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;"><div class="lf-avatar" style="background:#C62828;font-size:11px">SR</div><div><div class="lf-name">SR</div><div class="lf-role">CoE Lead</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px;"><div class="lf-avatar" style="background:#1565C0;font-size:11px">JC</div><div><div class="lf-name">JC</div><div class="lf-role">ML Engineering Lead</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px;"><div class="lf-avatar" style="background:#1B5E20;font-size:11px">PW</div><div><div class="lf-name">PW</div><div class="lf-role">Data Governance</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px;"><div class="lf-avatar" style="background:#6A1B9A;font-size:11px">MK</div><div><div class="lf-name">MK</div><div class="lf-role">FinOps &amp; Optimization</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 01 ABOUT ══ -->
+  <div class="page" id="page-about">
+    <div class="wp-banner"><div class="wp-banner-overlay"></div><div class="wp-banner-pattern"></div><div class="wp-banner-content"><div class="wbc-eyebrow">ℹ️ Section 01</div><div class="wbc-title">About CoE &amp; Engagement</div><div class="wbc-desc">Understand our charter, governance model, team structure, and how to engage with the CoE for support, reviews, and collaboration.</div><div class="wbc-meta"><div class="wbc-pill">Charter</div><div class="wbc-pill">Team</div><div class="wbc-pill">Governance</div><div class="wbc-pill">Engagement Model</div></div></div></div>
+    <div class="wp-card-grid c2">
+      <div class="sp-card"><div class="sp-card-icon ic-blue">📋</div><div class="sp-card-title">CoE Charter &amp; Mission</div><div class="sp-card-desc">Our purpose, scope, operating principles, and the value we deliver to project teams and the business.</div><div class="sp-card-footer"><span class="sp-card-link">Read Charter →</span><span class="badge blue">Document</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-indigo">👥</div><div class="sp-card-title">Team Structure &amp; Roles</div><div class="sp-card-desc">Meet the CoE leadership, domain leads, and the extended network of Databricks champions across BUs.</div><div class="sp-card-footer"><span class="sp-card-link">View Team →</span><span class="badge indigo">People</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-teal">🤝</div><div class="sp-card-title">Engagement Model</div><div class="sp-card-desc">How to request CoE support — from architecture reviews to embedded engagements and office hours.</div><div class="sp-card-footer"><span class="sp-card-link">Engage CoE →</span><span class="badge teal">Process</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-amber">🗓️</div><div class="sp-card-title">Governance &amp; Cadence</div><div class="sp-card-desc">Steering committee cadence, decision rights, escalation paths, and quarterly review process.</div><div class="sp-card-footer"><span class="sp-card-link">View Calendar →</span><span class="badge amber">Calendar</span></div></div>
+    </div>
+    <div class="wp-section-hd">Engagement Tiers</div>
+    <div class="tier-cards">
+      <div class="tier-card green-top"><div class="tc-icon">🟢</div><div class="tc-title">Self-Service</div><div class="tc-desc">Access templates, guides, and the knowledge base independently. Suitable for experienced teams with clear requirements.</div></div>
+      <div class="tier-card amber-top"><div class="tc-icon">🟡</div><div class="tc-title">Advisory</div><div class="tc-desc">Architecture review, design feedback, and targeted CoE expert support for specific challenges and critical decisions.</div></div>
+      <div class="tier-card red-top"><div class="tc-icon">🔴</div><div class="tc-title">Embedded</div><div class="tc-desc">A dedicated CoE resource embedded in the delivery team for complex, high-risk, or strategically important programmes.</div></div>
+    </div>
+  </div>
+
+  <!-- ══ 02 FUNDAMENTALS ══ -->
+  <div class="page" id="page-fundamentals">
+    <div class="wp-banner" style="background:linear-gradient(135deg,#006064 0%,#0097A7 50%,#00BCD4 100%)"><div class="wp-banner-overlay"></div><div class="wp-banner-pattern"></div><div class="wp-banner-content"><div class="wbc-eyebrow">⚡ Section 02</div><div class="wbc-title">Azure Databricks Fundamentals Hub</div><div class="wbc-desc">Core platform concepts, architecture patterns, and approved configurations for our Azure Databricks environment.</div><div class="wbc-meta"><div class="wbc-pill">Architecture</div><div class="wbc-pill">Workspaces</div><div class="wbc-pill">Unity Catalog</div><div class="wbc-pill">Runtimes</div></div></div></div>
+    <div class="wp-section-hd">Core Platform Concepts</div>
+    <div class="wp-card-grid c3">
+      <div class="sp-card"><div class="sp-card-icon ic-blue">🏗️</div><div class="sp-card-title">Platform Architecture</div><div class="sp-card-desc">Control plane vs data plane, workspace topology, VNet injection, and approved network patterns for enterprise deployments.</div><div class="sp-card-footer"><span class="sp-card-link">View Diagrams →</span><span class="badge blue">Architecture</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-teal">🗂️</div><div class="sp-card-title">Unity Catalog Overview</div><div class="sp-card-desc">Three-level namespace, catalog hierarchy, metastore design, and data access patterns for governed analytics.</div><div class="sp-card-footer"><span class="sp-card-link">Read Guide →</span><span class="badge teal">Governance</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-indigo">🖥️</div><div class="sp-card-title">Cluster Types &amp; Policies</div><div class="sp-card-desc">All-purpose vs job clusters, approved instance types, autoscaling rules, and spot instance configuration.</div><div class="sp-card-footer"><span class="sp-card-link">View Policies →</span><span class="badge indigo">Standards</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-blue">🌊</div><div class="sp-card-title">Delta Lake Fundamentals</div><div class="sp-card-desc">ACID transactions, time travel, schema enforcement, liquid clustering, and the medallion architecture pattern.</div><div class="sp-card-footer"><span class="sp-card-link">Explore →</span><span class="badge blue">Core Concept</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-amber">⚙️</div><div class="sp-card-title">Runtime &amp; Library Standards</div><div class="sp-card-desc">Approved Databricks Runtime versions, library management policy, and our internal PyPI mirror usage.</div><div class="sp-card-footer"><span class="sp-card-link">See Standards →</span><span class="badge amber">Standards</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-red">🔑</div><div class="sp-card-title">Identity &amp; Access</div><div class="sp-card-desc">Azure AD integration, service principals, managed identities, and PAT token governance policy.</div><div class="sp-card-footer"><span class="sp-card-link">View Setup →</span><span class="badge red">Security</span></div></div>
+    </div>
+  </div>
+
+  <!-- ══ 03 TRAINING ══ -->
+  <div class="page" id="page-training">
+    <div class="wp-banner amber-theme"><div class="wp-banner-overlay"></div><div class="wp-banner-pattern"></div><div class="wp-banner-content"><div class="wbc-eyebrow">🎓 Section 03</div><div class="wbc-title">Training &amp; Certification</div><div class="wbc-desc">Structured learning paths, hands-on labs, and certification preparation tailored to your role and experience level.</div></div></div>
+    <div class="wp-stat-strip cols-4">
+      <div class="stat-tile"><div class="stat-tile-val amber">6</div><div class="stat-tile-label">Learning Paths</div></div>
+      <div class="stat-tile"><div class="stat-tile-val brand">34</div><div class="stat-tile-label">Courses Available</div></div>
+      <div class="stat-tile"><div class="stat-tile-val green">218</div><div class="stat-tile-label">Enrolled This Month</div><div class="stat-tile-trend up">↑ 14% vs last month</div></div>
+      <div class="stat-tile"><div class="stat-tile-val info">4</div><div class="stat-tile-label">Certifications Tracked</div></div>
+    </div>
+    <div class="wp-section-hd">Learning Paths by Role</div>
+    <div class="wp-card-grid c2">
+      <div class="sp-card"><div class="sp-card-icon ic-amber">🔧</div><div class="sp-card-title">Data Engineer Track</div><div class="sp-card-desc">Delta Lake · DLT Pipelines · Orchestration · MLflow — 8 modules, ~14 hours</div><div class="sp-card-footer"><span class="sp-card-link">Enrol →</span><span class="badge amber">Intermediate</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-red">🤖</div><div class="sp-card-title">ML Engineer Track</div><div class="sp-card-desc">Feature Store · MLflow · Mosaic AI · Model Serving — 10 modules, ~18 hours</div><div class="sp-card-footer"><span class="sp-card-link">Enrol →</span><span class="badge red">Advanced</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-blue">📊</div><div class="sp-card-title">Data Analyst Track</div><div class="sp-card-desc">SQL Warehouses · Dashboards · Unity Catalog — 6 modules, ~10 hours</div><div class="sp-card-footer"><span class="sp-card-link">Enrol →</span><span class="badge blue">Beginner</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-green">🏗️</div><div class="sp-card-title">Platform Admin Track</div><div class="sp-card-desc">Workspace Admin · Cluster Policies · FinOps — 7 modules, ~12 hours</div><div class="sp-card-footer"><span class="sp-card-link">Enrol →</span><span class="badge green">Advanced</span></div></div>
+    </div>
+    <div class="wp-section-hd">Certification Pathway — Data Engineer Professional</div>
+    <div class="wp-timeline">
+      <div class="tl-item"><div class="tl-dot done">✓</div><div class="tl-body"><div class="tl-title">Spark Foundations</div><div class="tl-desc">Completed — Core Spark, DataFrames, transformations &amp; actions</div></div></div>
+      <div class="tl-item"><div class="tl-dot done">✓</div><div class="tl-body"><div class="tl-title">Delta Lake Core</div><div class="tl-desc">Completed — ACID transactions, time travel, liquid clustering</div></div></div>
+      <div class="tl-item"><div class="tl-dot active">→</div><div class="tl-body"><div class="tl-title">Delta Live Tables</div><div class="tl-desc">In Progress — Streaming, expectations &amp; CDC patterns</div></div></div>
+      <div class="tl-item"><div class="tl-dot pending">○</div><div class="tl-body"><div class="tl-title">Unity Catalog &amp; Governance</div><div class="tl-desc">Locked — Complete DLT module first</div></div></div>
+      <div class="tl-item"><div class="tl-dot pending">○</div><div class="tl-body"><div class="tl-title">Exam Preparation &amp; Certification</div><div class="tl-desc">Locked</div></div></div>
+    </div>
+  </div>
+
+  <!-- ══ 04 PRE-SALES ══ -->
+  <div class="page" id="page-presales">
+    <div class="wp-banner indigo-theme"><div class="wp-banner-overlay"></div><div class="wp-banner-pattern"></div><div class="wp-banner-content"><div class="wbc-eyebrow">💼 Section 04</div><div class="wbc-title">Pre-Sales &amp; Solution Engineering</div><div class="wbc-desc">Everything you need to support opportunity qualification, RFP responses, demos, PoC scoping, and SOW creation.</div></div></div>
+    <div class="wp-card-grid c3">
+      <div class="sp-card"><div class="sp-card-icon ic-indigo">📝</div><div class="sp-card-title">RFP Response Library</div><div class="sp-card-desc">Pre-approved responses to common RFP questions across security, compliance, architecture, and SLAs.</div><div class="sp-card-footer"><span class="sp-card-link">Browse →</span><span class="badge indigo">Library</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-blue">🎯</div><div class="sp-card-title">PoC Scoping Templates</div><div class="sp-card-desc">Scoping worksheets, success criteria frameworks, and 2-week / 4-week PoC agendas.</div><div class="sp-card-footer"><span class="sp-card-link">Get Templates →</span><span class="badge blue">Templates</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-teal">🖥️</div><div class="sp-card-title">Demo Environment</div><div class="sp-card-desc">Request access to the pre-configured demo workspace with sample datasets and pre-built notebooks.</div><div class="sp-card-footer"><span class="sp-card-link">Request Access →</span><span class="badge teal">Environment</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-amber">📐</div><div class="sp-card-title">SOW Templates</div><div class="sp-card-desc">Standard SOW frameworks for greenfield builds, migrations, and advisory engagements.</div><div class="sp-card-footer"><span class="sp-card-link">View Templates →</span><span class="badge amber">Templates</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-purple">💬</div><div class="sp-card-title">Discovery Questionnaires</div><div class="sp-card-desc">Structured intake questionnaires to qualify opportunities and surface architecture requirements.</div><div class="sp-card-footer"><span class="sp-card-link">Download →</span><span class="badge purple">Forms</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-green">📊</div><div class="sp-card-title">Sizing &amp; Estimation Tool</div><div class="sp-card-desc">DBU estimation calculator and project sizing model for common workload types.</div><div class="sp-card-footer"><span class="sp-card-link">Open Tool →</span><span class="badge green">Calculator</span></div></div>
+    </div>
+  </div>
+
+  <!-- ══ 05 SALES ══ -->
+  <div class="page" id="page-sales">
+    <div class="wp-banner green-theme"><div class="wp-banner-overlay"></div><div class="wp-banner-pattern"></div><div class="wp-banner-content"><div class="wbc-eyebrow">📈 Section 05</div><div class="wbc-title">Sales Enablement</div><div class="wbc-desc">Pitch decks, battlecards, competitive positioning, ROI calculators, and customer-facing collateral for every deal stage.</div></div></div>
+    <div class="wp-card-grid c3">
+      <div class="sp-card"><div class="sp-card-icon ic-green">📊</div><div class="sp-card-title">Pitch Deck Library</div><div class="sp-card-desc">Segment-specific pitch decks: Financial Services, Retail, Manufacturing, Healthcare, and generic.</div><div class="sp-card-footer"><span class="sp-card-link">Browse Decks →</span><span class="badge green">Presentations</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-red">⚔️</div><div class="sp-card-title">Competitive Battlecards</div><div class="sp-card-desc">Competitive positioning vs Snowflake, Azure Synapse, Google BigQuery, and AWS Glue.</div><div class="sp-card-footer"><span class="sp-card-link">View →</span><span class="badge red">Competitive</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-amber">💹</div><div class="sp-card-title">ROI &amp; Value Calculator</div><div class="sp-card-desc">Interactive ROI model showing TCO savings, time-to-insight acceleration, and engineering productivity gains.</div><div class="sp-card-footer"><span class="sp-card-link">Open Calculator →</span><span class="badge amber">Tool</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-blue">📣</div><div class="sp-card-title">Customer Case Studies</div><div class="sp-card-desc">Anonymised success stories by industry and workload type for use in proposals and presentations.</div><div class="sp-card-footer"><span class="sp-card-link">Read →</span><span class="badge blue">Case Studies</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-teal">🎪</div><div class="sp-card-title">Event &amp; Workshop Kits</div><div class="sp-card-desc">Pre-built workshop agendas, hands-on lab environments, and facilitator guides for customer events.</div><div class="sp-card-footer"><span class="sp-card-link">Get Kits →</span><span class="badge teal">Events</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-indigo">📋</div><div class="sp-card-title">One-Pagers &amp; Datasheets</div><div class="sp-card-desc">Solution-specific one-pagers covering Lakehouse, MLflow, Unity Catalog, and Delta Live Tables.</div><div class="sp-card-footer"><span class="sp-card-link">Download →</span><span class="badge indigo">Collateral</span></div></div>
+    </div>
+  </div>
+
+  <!-- ══ 06 DELIVERY ══ -->
+  <div class="page" id="page-delivery">
+    <div class="wp-banner red-theme"><div class="wp-banner-overlay"></div><div class="wp-banner-pattern"></div><div class="wp-banner-content"><div class="wbc-eyebrow">🚀 Section 06</div><div class="wbc-title">Delivery &amp; Implementation Playbooks</div><div class="wbc-desc">Project delivery frameworks, RACI templates, phase gate checklists, and implementation runbooks for Databricks engagements.</div></div></div>
+    <div class="wp-stat-strip cols-4">
+      <div class="stat-tile"><div class="stat-tile-val red">3</div><div class="stat-tile-label">Delivery Playbooks</div></div>
+      <div class="stat-tile"><div class="stat-tile-val brand">12</div><div class="stat-tile-label">Project Templates</div></div>
+      <div class="stat-tile"><div class="stat-tile-val green">47</div><div class="stat-tile-label">Active Deliveries</div></div>
+      <div class="stat-tile"><div class="stat-tile-val green">94%</div><div class="stat-tile-label">On-Time Rate</div><div class="stat-tile-trend up">↑ 3% vs last quarter</div></div>
+    </div>
+    <div class="wp-card-grid c3">
+      <div class="sp-card"><div class="sp-card-icon ic-red">🗺️</div><div class="sp-card-title">Agile Delivery Playbook</div><div class="sp-card-desc">Sprint cadence, definition of done, backlog templates, and stakeholder reporting for data projects.</div><div class="sp-card-footer"><span class="sp-card-link">Open Playbook →</span><span class="badge red">Playbook</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-blue">🏁</div><div class="sp-card-title">Phase Gate Checklists</div><div class="sp-card-desc">Inception, design, build, test, and go-live checklists with mandatory sign-off criteria.</div><div class="sp-card-footer"><span class="sp-card-link">View →</span><span class="badge blue">Checklists</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-amber">👥</div><div class="sp-card-title">RACI &amp; Staffing Models</div><div class="sp-card-desc">Role definitions, RACI matrices, and staffing models by engagement type and project size.</div><div class="sp-card-footer"><span class="sp-card-link">Download →</span><span class="badge amber">Templates</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-purple">⚠️</div><div class="sp-card-title">Risk &amp; Issue Management</div><div class="sp-card-desc">RAID log templates, risk register, and escalation paths for data engineering projects.</div><div class="sp-card-footer"><span class="sp-card-link">View →</span><span class="badge purple">RAID</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-green">✅</div><div class="sp-card-title">QA &amp; Review Gates</div><div class="sp-card-desc">Code review standards, architecture review process, and pre-go-live validation checklist.</div><div class="sp-card-footer"><span class="sp-card-link">Read →</span><span class="badge green">QA</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-teal">📦</div><div class="sp-card-title">Handover &amp; Runbook Templates</div><div class="sp-card-desc">Operational handover checklist, runbook structure, and knowledge transfer plan templates.</div><div class="sp-card-footer"><span class="sp-card-link">Get Templates →</span><span class="badge teal">Templates</span></div></div>
+    </div>
+  </div>
+
+  <!-- ══ 07 GREENFIELD ══ -->
+  <div class="page" id="page-greenfield">
+    <div class="wp-banner green-theme"><div class="wp-banner-overlay"></div><div class="wp-banner-pattern"></div><div class="wp-banner-content"><div class="wbc-eyebrow">🌱 Section 07</div><div class="wbc-title">Greenfield Implementation Kit</div><div class="wbc-desc">Everything needed to stand up a new Databricks environment from scratch — IaC modules, bootstrap scripts, and reference architectures.</div><div class="wbc-actions"><button class="wbc-btn solid">Download Full Kit</button><button class="wbc-btn outline">View on GitHub</button></div></div></div>
+    <div class="wp-alert success"><span class="wp-alert-icon">✅</span><div class="wp-alert-body"><strong>Kit v2.0 is live.</strong> Updated Feb 2026 — includes Unity Catalog bootstrap, Private Link runbook, and Terraform module v2.1.</div></div>
+    <div class="wp-section-hd">Kit Contents Checklist</div>
+    <div class="wp-checklist">
+      <div class="wc-item"><div class="wc-check done">✓</div><div class="wc-body"><div class="wc-title">Terraform Module: Workspace Provisioning</div><div class="wc-sub">Multi-workspace (dev/staging/prod) with VNet injection and private endpoints — v2.1</div></div></div>
+      <div class="wc-item"><div class="wc-check done">✓</div><div class="wc-body"><div class="wc-title">Unity Catalog Bootstrap Script</div><div class="wc-sub">Metastore setup, catalog hierarchy, and initial permissions model</div></div></div>
+      <div class="wc-item"><div class="wc-check done">✓</div><div class="wc-body"><div class="wc-title">Cluster Policy Templates</div><div class="wc-sub">Dev, job, and BI cluster policies with cost guardrails and auto-termination</div></div></div>
+      <div class="wc-item"><div class="wc-check done">✓</div><div class="wc-body"><div class="wc-title">Azure AD / Entra ID Integration Guide</div><div class="wc-sub">SSO, SCIM provisioning, and conditional access setup walkthrough</div></div></div>
+      <div class="wc-item"><div class="wc-check done">✓</div><div class="wc-body"><div class="wc-title">Networking Runbook (Private Link)</div><div class="wc-sub">Step-by-step private link, no-public-IP, and NSG / firewall rules</div></div></div>
+      <div class="wc-item"><div class="wc-check done">✓</div><div class="wc-body"><div class="wc-title">Reference Architecture: Medallion Lakehouse</div><div class="wc-sub">Bronze / Silver / Gold with DLT and Unity Catalog — v3.2</div></div></div>
+      <div class="wc-item"><div class="wc-check pending">○</div><div class="wc-body"><div class="wc-title">CI/CD Pipeline Starter (Azure DevOps)</div><div class="wc-sub">Coming Q2 2026 — ADO YAML pipeline templates for notebook &amp; wheel deployments</div></div></div>
+    </div>
+    <div class="wp-card-grid c3">
+      <div class="sp-card"><div class="sp-card-icon ic-blue">📐</div><div class="sp-card-title">Reference Architecture v3.2</div><div class="sp-card-desc">Full enterprise Lakehouse blueprint with network, identity, and governance layers — PDF &amp; Visio.</div><div class="sp-card-footer"><span class="sp-card-link">Download →</span><span class="badge blue">PDF + Visio</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-green">🤖</div><div class="sp-card-title">Automated Setup Script</div><div class="sp-card-desc">Python CLI tool that provisions a workspace, Unity Catalog, and cluster policies in under 20 minutes.</div><div class="sp-card-footer"><span class="sp-card-link">GitHub Repo →</span><span class="badge green">Script</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-amber">✅</div><div class="sp-card-title">Pre-flight Readiness Checklist</div><div class="sp-card-desc">Azure subscription permissions, networking, quota checks, and licensing pre-flight requirements.</div><div class="sp-card-footer"><span class="sp-card-link">Open Checklist →</span><span class="badge amber">Checklist</span></div></div>
+    </div>
+  </div>
+
+  <!-- ══ 08 MIGRATION ══ -->
+  <div class="page" id="page-migration">
+    <div class="wp-banner" style="background:linear-gradient(135deg,#004D40 0%,#006064 50%,#0097A7 100%)"><div class="wp-banner-overlay"></div><div class="wp-banner-pattern"></div><div class="wp-banner-content"><div class="wbc-eyebrow">🔄 Section 08</div><div class="wbc-title">Migration Factory</div><div class="wbc-desc">Proven frameworks for migrating from Hadoop, HDInsight, Azure Synapse, and other legacy platforms to Databricks Lakehouse.</div></div></div>
+    <div class="wp-section-hd">Source Platform Playbooks</div>
+    <div class="wp-card-grid c2">
+      <div class="sp-card featured"><div class="sp-card-icon ic-amber">🐘</div><div style="flex:1"><div class="sp-card-title">Hadoop / Hive → Databricks</div><div class="sp-card-desc">Workload assessment, HQL to Spark SQL transpilation, HDFS to ADLS migration, and cut-over strategy.</div><div class="sp-card-footer"><span class="sp-card-link">Open Playbook →</span><span class="badge green">Playbook Available</span></div></div></div>
+      <div class="sp-card featured"><div class="sp-card-icon ic-blue">❄️</div><div style="flex:1"><div class="sp-card-title">Snowflake → Databricks</div><div class="sp-card-desc">Schema migration, warehouse equivalence mapping, and cost comparison framework with TCO calculator.</div><div class="sp-card-footer"><span class="sp-card-link">Open Playbook →</span><span class="badge green">Playbook Available</span></div></div></div>
+      <div class="sp-card featured"><div class="sp-card-icon ic-indigo">🔷</div><div style="flex:1"><div class="sp-card-title">Azure Synapse → Databricks</div><div class="sp-card-desc">Dedicated pool migration, Spark pool consolidation, and Synapse Analytics to Databricks SQL equivalence guide.</div><div class="sp-card-footer"><span class="sp-card-link">View Draft →</span><span class="badge amber">In Review</span></div></div></div>
+      <div class="sp-card featured"><div class="sp-card-icon ic-green">💡</div><div style="flex:1"><div class="sp-card-title">SQL Server / ADF Pipelines</div><div class="sp-card-desc">ADF activity migration to Databricks Workflows and SQL Server source patterns using Autoloader &amp; CDC.</div><div class="sp-card-footer"><span class="sp-card-link">Open Playbook →</span><span class="badge green">New</span></div></div></div>
+    </div>
+    <div class="wp-section-hd">Migration Tooling</div>
+    <div class="wp-card-grid c3">
+      <div class="sp-card"><div class="sp-card-icon ic-blue">🔍</div><div class="sp-card-title">Workload Assessment Tool</div><div class="sp-card-desc">Automated discovery cataloguing existing jobs, tables, and dependencies for migration sizing.</div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-amber">🔁</div><div class="sp-card-title">Transpilation Utility</div><div class="sp-card-desc">HQL / T-SQL to Spark SQL conversion with confidence scoring and manual review queue.</div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-green">📊</div><div class="sp-card-title">Migration Tracker Template</div><div class="sp-card-desc">SharePoint list &amp; Excel tracker for migration waves, status, and validation sign-off.</div></div>
+    </div>
+  </div>
+
+  <!-- ══ 09 DEVOPS ══ -->
+  <div class="page" id="page-devops">
+    <div class="wp-banner amber-theme"><div class="wp-banner-overlay"></div><div class="wp-banner-pattern"></div><div class="wp-banner-content"><div class="wbc-eyebrow">⚙️ Section 09</div><div class="wbc-title">DevOps &amp; Engineering Standards</div><div class="wbc-desc">CI/CD pipelines, branching strategy, code quality standards, testing frameworks, and notebook engineering best practices.</div></div></div>
+    <div class="wp-card-grid c3">
+      <div class="sp-card"><div class="sp-card-icon ic-amber">🔀</div><div class="sp-card-title">Branching Strategy</div><div class="sp-card-desc">Git flow adapted for data engineering: feature → dev → staging → main, with trunk-based variant for smaller teams.</div><div class="sp-card-footer"><span class="sp-card-link">Read Guide →</span><span class="badge amber">Standards</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-blue">🔧</div><div class="sp-card-title">CI/CD Pipeline Templates (ADO)</div><div class="sp-card-desc">Azure DevOps YAML pipeline templates for notebook deployment, wheel deployment, and DBX CLI.</div><div class="sp-card-footer"><span class="sp-card-link">View Templates →</span><span class="badge blue">Templates</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-green">🧪</div><div class="sp-card-title">Testing Standards</div><div class="sp-card-desc">Unit testing with pytest + chispa, integration testing patterns, and data quality testing with Great Expectations.</div><div class="sp-card-footer"><span class="sp-card-link">Read →</span><span class="badge green">Standards</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-indigo">📝</div><div class="sp-card-title">Notebook Engineering Guide</div><div class="sp-card-desc">Structure, documentation, parameter standards, widget usage, and the notebook-as-module pattern.</div><div class="sp-card-footer"><span class="sp-card-link">View Guide →</span><span class="badge indigo">Guide</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-red">🔍</div><div class="sp-card-title">Code Review Checklist</div><div class="sp-card-desc">PR checklist covering correctness, performance, security, readability, and test coverage requirements.</div><div class="sp-card-footer"><span class="sp-card-link">Download →</span><span class="badge red">Checklist</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-teal">🧹</div><div class="sp-card-title">Linting &amp; Formatting Config</div><div class="sp-card-desc">Ruff, Black, isort config files and pre-commit hooks aligned to our engineering standards.</div><div class="sp-card-footer"><span class="sp-card-link">Get Config →</span><span class="badge teal">Config</span></div></div>
+    </div>
+  </div>
+
+  <!-- ══ 10 SECURITY ══ -->
+  <div class="page" id="page-security">
+    <div class="wp-banner red-theme"><div class="wp-banner-overlay"></div><div class="wp-banner-pattern"></div><div class="wp-banner-content"><div class="wbc-eyebrow">🔐 Section 10</div><div class="wbc-title">Security &amp; Governance (Unity Catalog)</div><div class="wbc-desc">Data access control, network security, compliance frameworks, secrets management, and Unity Catalog governance standards.</div></div></div>
+    <div class="wp-stat-strip cols-4">
+      <div class="stat-tile"><div class="stat-tile-val green">✓</div><div class="stat-tile-label">SOC 2 Type II</div></div>
+      <div class="stat-tile"><div class="stat-tile-val green">✓</div><div class="stat-tile-label">ISO 27001</div></div>
+      <div class="stat-tile"><div class="stat-tile-val green">✓</div><div class="stat-tile-label">GDPR Aligned</div></div>
+      <div class="stat-tile"><div class="stat-tile-val amber">In Progress</div><div class="stat-tile-label">PCI DSS</div></div>
+    </div>
+    <div class="wp-card-grid c3">
+      <div class="sp-card"><div class="sp-card-icon ic-red">🗂️</div><div class="sp-card-title">Unity Catalog Access Model</div><div class="sp-card-desc">Catalog/schema/table privilege model, row-level security, column masking, and dynamic views.</div><div class="sp-card-footer"><span class="sp-card-link">Read Guide →</span><span class="badge red">Security</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-blue">🌐</div><div class="sp-card-title">Network Security Standards</div><div class="sp-card-desc">Private Link, no-public-IP clusters, IP access lists, and approved NSG / firewall configurations.</div><div class="sp-card-footer"><span class="sp-card-link">View Standards →</span><span class="badge blue">Network</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-amber">🔑</div><div class="sp-card-title">Secrets Management</div><div class="sp-card-desc">Azure Key Vault integration, Databricks Secret scopes, and service principal credential rotation policy.</div><div class="sp-card-footer"><span class="sp-card-link">View Guide →</span><span class="badge amber">Secrets</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-teal">📋</div><div class="sp-card-title">Audit &amp; Compliance</div><div class="sp-card-desc">Diagnostic log configuration, audit log analysis queries, and compliance reporting templates.</div><div class="sp-card-footer"><span class="sp-card-link">View Templates →</span><span class="badge teal">Compliance</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-purple">🔒</div><div class="sp-card-title">Data Classification Standard</div><div class="sp-card-desc">Four-tier classification (Public / Internal / Confidential / Restricted) and tagging implementation guide.</div><div class="sp-card-footer"><span class="sp-card-link">Read →</span><span class="badge purple">Standard</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-indigo">🛡️</div><div class="sp-card-title">Encryption Standards</div><div class="sp-card-desc">BYOK configuration, Azure CMK setup, and data-at-rest / in-transit encryption requirements.</div><div class="sp-card-footer"><span class="sp-card-link">View Setup →</span><span class="badge indigo">Encryption</span></div></div>
+    </div>
+  </div>
+
+  <!-- ══ 11 OPERATIONS ══ -->
+  <div class="page" id="page-operations">
+    <div class="wp-banner" style="background:linear-gradient(135deg,#1A237E 0%,#283593 50%,#3949AB 100%)"><div class="wp-banner-overlay"></div><div class="wp-banner-pattern"></div><div class="wp-banner-content"><div class="wbc-eyebrow">🛠️ Section 11</div><div class="wbc-title">Operations &amp; Support</div><div class="wbc-desc">Runbooks, SLAs, incident management, monitoring configuration, and support processes for production Databricks workloads.</div></div></div>
+    <div class="wp-stat-strip cols-4">
+      <div class="stat-tile"><div class="stat-tile-val green">98.4%</div><div class="stat-tile-label">Platform Uptime</div></div>
+      <div class="stat-tile"><div class="stat-tile-val brand">P1: 1h</div><div class="stat-tile-label">Response SLA</div></div>
+      <div class="stat-tile"><div class="stat-tile-val amber">3</div><div class="stat-tile-label">Open Incidents</div></div>
+      <div class="stat-tile"><div class="stat-tile-val info">142</div><div class="stat-tile-label">Tickets This Month</div></div>
+    </div>
+    <div class="wp-section-hd">Runbook &amp; Support Library</div>
+    <div class="sp-doc-table">
+      <div class="sdt-header sdt-cols-4"><span>Runbook / Document</span><span>Category</span><span>Owner</span><span>Last Updated</span></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">📄</span>Cluster Failure — Investigation &amp; Recovery</div><div class="sdt-cell"><span class="badge green">Runbook</span></div><div class="sdt-cell">Platform Team</div><div class="sdt-cell">Feb 2026</div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">📄</span>Job Failure — Root Cause Analysis Process</div><div class="sdt-cell"><span class="badge green">Runbook</span></div><div class="sdt-cell">DE Team</div><div class="sdt-cell">Jan 2026</div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">📄</span>Unity Catalog Access Denial — Troubleshooting</div><div class="sdt-cell"><span class="badge blue">Troubleshooting</span></div><div class="sdt-cell">Governance</div><div class="sdt-cell">Feb 2026</div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">📄</span>Incident Management Process</div><div class="sdt-cell"><span class="badge red">Process</span></div><div class="sdt-cell">CoE Lead</div><div class="sdt-cell">Mar 2026</div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">📄</span>DBU Spike Investigation Runbook</div><div class="sdt-cell"><span class="badge amber">FinOps</span></div><div class="sdt-cell">FinOps Team</div><div class="sdt-cell">Feb 2026</div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">📄</span>Monitoring &amp; Alerting Setup (Azure Monitor)</div><div class="sdt-cell"><span class="badge blue">Setup Guide</span></div><div class="sdt-cell">Platform Team</div><div class="sdt-cell">Jan 2026</div></div>
+    </div>
+  </div>
+
+  <!-- ══ 12 FINOPS ══ -->
+  <div class="page" id="page-finops">
+    <div class="wp-banner amber-theme"><div class="wp-banner-overlay"></div><div class="wp-banner-pattern"></div><div class="wp-banner-content"><div class="wbc-eyebrow">💰 Section 12</div><div class="wbc-title">Cost Optimization &amp; FinOps</div><div class="wbc-desc">DBU management, tagging strategy, forecasting, reserved compute guidance, and the monthly cost governance review process.</div></div></div>
+    <div class="wp-stat-strip cols-4">
+      <div class="stat-tile"><div class="stat-tile-val amber">$142K</div><div class="stat-tile-label">Monthly DBU Spend</div></div>
+      <div class="stat-tile"><div class="stat-tile-val green">-23%</div><div class="stat-tile-label">vs Q4 2025</div><div class="stat-tile-trend up">↑ Best quarter on record</div></div>
+      <div class="stat-tile"><div class="stat-tile-val brand">78%</div><div class="stat-tile-label">Spot Instance Usage</div></div>
+      <div class="stat-tile"><div class="stat-tile-val green">94%</div><div class="stat-tile-label">Tagged Resources</div></div>
+    </div>
+    <div class="wp-2col">
+      <div>
+        <div class="wp-section-hd">Optimization Coverage</div>
+        <div class="wp-progress-list">
+          <div class="wp-prog-item"><div class="wp-prog-hd"><span class="wp-prog-label">Cluster Right-Sizing</span><span class="wp-prog-pct">82%</span></div><div class="wp-prog-bar"><div class="wp-prog-fill" style="width:82%;background:var(--brand)"></div></div></div>
+          <div class="wp-prog-item"><div class="wp-prog-hd"><span class="wp-prog-label">Spot Instance Adoption</span><span class="wp-prog-pct">78%</span></div><div class="wp-prog-bar"><div class="wp-prog-fill" style="width:78%;background:var(--success)"></div></div></div>
+          <div class="wp-prog-item"><div class="wp-prog-hd"><span class="wp-prog-label">Auto-Termination Compliance</span><span class="wp-prog-pct">95%</span></div><div class="wp-prog-bar"><div class="wp-prog-fill" style="width:95%;background:var(--success)"></div></div></div>
+          <div class="wp-prog-item"><div class="wp-prog-hd"><span class="wp-prog-label">Resource Tagging Coverage</span><span class="wp-prog-pct">94%</span></div><div class="wp-prog-bar"><div class="wp-prog-fill" style="width:94%;background:var(--warn)"></div></div></div>
+          <div class="wp-prog-item"><div class="wp-prog-hd"><span class="wp-prog-label">Reserved Compute Utilisation</span><span class="wp-prog-pct">61%</span></div><div class="wp-prog-bar"><div class="wp-prog-fill" style="width:61%;background:var(--info)"></div></div></div>
+        </div>
+        <div class="wp-card-grid c3" style="margin-top:0">
+          <div class="sp-card"><div class="sp-card-icon ic-amber">🏷️</div><div class="sp-card-title">Tagging Policy</div><div class="sp-card-desc">Mandatory tags and cluster policy enforcement guide.</div><div class="sp-card-footer"><span class="sp-card-link">View Policy →</span></div></div>
+          <div class="sp-card"><div class="sp-card-icon ic-blue">📉</div><div class="sp-card-title">DBU Forecasting Model</div><div class="sp-card-desc">Monthly forecast template with actuals and variance.</div><div class="sp-card-footer"><span class="sp-card-link">Open Model →</span></div></div>
+          <div class="sp-card"><div class="sp-card-icon ic-green">📋</div><div class="sp-card-title">Monthly Review Process</div><div class="sp-card-desc">Review cadence and escalation thresholds.</div><div class="sp-card-footer"><span class="sp-card-link">View Process →</span></div></div>
+        </div>
+      </div>
+      <div class="right-rail">
+        <div class="rail-card">
+          <div class="rc-title">💡 Top Savings Tips</div>
+          <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--n600);">
+            <div style="display:flex;gap:8px;align-items:flex-start"><span>1.</span><span>Enable auto-termination (≤ 60 min idle)</span></div>
+            <div style="display:flex;gap:8px;align-items:flex-start"><span>2.</span><span>Use spot instances for non-critical jobs</span></div>
+            <div style="display:flex;gap:8px;align-items:flex-start"><span>3.</span><span>Apply OPTIMIZE + ZORDER weekly</span></div>
+            <div style="display:flex;gap:8px;align-items:flex-start"><span>4.</span><span>Review oversized clusters monthly</span></div>
+            <div style="display:flex;gap:8px;align-items:flex-start"><span>5.</span><span>Tag all resources for attribution</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 13 ACCELERATORS ══ -->
+  <div class="page" id="page-accelerators">
+    <div class="wp-banner indigo-theme"><div class="wp-banner-overlay"></div><div class="wp-banner-pattern"></div><div class="wp-banner-content"><div class="wbc-eyebrow">🧩 Section 13</div><div class="wbc-title">Accelerators &amp; Reusable Assets</div><div class="wbc-desc">Production-ready notebooks, Python libraries, DLT pipeline templates, and solution accelerators for the most common use cases.</div></div></div>
+    <div class="wp-section-hd">Asset Library</div>
+    <div class="sp-doc-table">
+      <div class="sdt-header sdt-cols-5"><span>Asset</span><span>Type</span><span>Category</span><span>Version</span><span>Status</span></div>
+      <div class="sdt-row sdt-cols-5"><div class="sdt-name"><span class="sdt-name-icon">📓</span>Autoloader Ingest Framework</div><div class="sdt-cell"><span class="badge indigo">Notebook</span></div><div class="sdt-cell">Data Engineering</div><div class="sdt-cell">v2.3</div><div class="sdt-cell"><span class="badge green">Stable</span></div></div>
+      <div class="sdt-row sdt-cols-5"><div class="sdt-name"><span class="sdt-name-icon">🔄</span>DLT Medallion Pipeline Template</div><div class="sdt-cell"><span class="badge blue">DLT</span></div><div class="sdt-cell">Data Engineering</div><div class="sdt-cell">v1.8</div><div class="sdt-cell"><span class="badge green">Stable</span></div></div>
+      <div class="sdt-row sdt-cols-5"><div class="sdt-name"><span class="sdt-name-icon">📦</span>Delta Merge Utility (SCD Type 2)</div><div class="sdt-cell"><span class="badge indigo">Library</span></div><div class="sdt-cell">Data Engineering</div><div class="sdt-cell">v1.2</div><div class="sdt-cell"><span class="badge green">Stable</span></div></div>
+      <div class="sdt-row sdt-cols-5"><div class="sdt-name"><span class="sdt-name-icon">📓</span>MLflow Training Scaffold</div><div class="sdt-cell"><span class="badge indigo">Notebook</span></div><div class="sdt-cell">ML &amp; AI</div><div class="sdt-cell">v3.0</div><div class="sdt-cell"><span class="badge green">Stable</span></div></div>
+      <div class="sdt-row sdt-cols-5"><div class="sdt-name"><span class="sdt-name-icon">🧬</span>Feature Store Builder</div><div class="sdt-cell"><span class="badge blue">Library</span></div><div class="sdt-cell">ML &amp; AI</div><div class="sdt-cell">v1.1</div><div class="sdt-cell"><span class="badge amber">Beta</span></div></div>
+      <div class="sdt-row sdt-cols-5"><div class="sdt-name"><span class="sdt-name-icon">✅</span>Data Quality Framework (DQ Suite)</div><div class="sdt-cell"><span class="badge indigo">Library</span></div><div class="sdt-cell">Governance</div><div class="sdt-cell">v2.0</div><div class="sdt-cell"><span class="badge green">Stable</span></div></div>
+      <div class="sdt-row sdt-cols-5"><div class="sdt-name"><span class="sdt-name-icon">🔐</span>Unity Catalog Bulk Permission Tool</div><div class="sdt-cell"><span class="badge red">Script</span></div><div class="sdt-cell">Governance</div><div class="sdt-cell">v1.0</div><div class="sdt-cell"><span class="badge amber">Beta</span></div></div>
+      <div class="sdt-row sdt-cols-5"><div class="sdt-name"><span class="sdt-name-icon">📊</span>Cost Attribution Dashboard</div><div class="sdt-cell"><span class="badge blue">Dashboard</span></div><div class="sdt-cell">FinOps</div><div class="sdt-cell">v1.5</div><div class="sdt-cell"><span class="badge green">Stable</span></div></div>
+    </div>
+  </div>
+
+  <!-- ══ 14 INDUSTRY ══ -->
+  <div class="page" id="page-industry">
+    <div class="wp-banner" style="background:linear-gradient(135deg,#37474F 0%,#455A64 50%,#546E7A 100%)"><div class="wp-banner-overlay"></div><div class="wp-banner-pattern"></div><div class="wp-banner-content"><div class="wbc-eyebrow">🏭 Section 14</div><div class="wbc-title">Industry Solutions</div><div class="wbc-desc">Vertical-specific reference architectures, datasets, and pre-built solution templates for key industry segments.</div></div></div>
+    <div class="wp-card-grid c2">
+      <div class="sp-card"><div class="sp-card-icon ic-blue">🏦</div><div class="sp-card-title">Financial Services</div><div class="sp-card-desc">Risk &amp; compliance lakehouse, real-time fraud detection, AML pipelines, and regulatory reporting accelerators.</div><div class="sp-card-footer"><span class="sp-card-link">View Assets →</span><div><span class="badge green">5 Assets</span>&nbsp;<span class="badge blue">3 Playbooks</span></div></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-green">🏥</div><div class="sp-card-title">Healthcare &amp; Life Sciences</div><div class="sp-card-desc">Clinical data integration (HL7/FHIR), genomics processing at scale, and clinical trial analytics pipelines.</div><div class="sp-card-footer"><span class="sp-card-link">View Assets →</span><div><span class="badge green">4 Assets</span>&nbsp;<span class="badge blue">2 Playbooks</span></div></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-amber">🛒</div><div class="sp-card-title">Retail &amp; Consumer Goods</div><div class="sp-card-desc">Demand forecasting, personalisation engines, supply chain optimisation, and clickstream analytics at scale.</div><div class="sp-card-footer"><span class="sp-card-link">View Assets →</span><div><span class="badge green">6 Assets</span>&nbsp;<span class="badge blue">2 Playbooks</span></div></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-teal">🏭</div><div class="sp-card-title">Manufacturing &amp; Energy</div><div class="sp-card-desc">IoT predictive maintenance, OEE dashboards, energy consumption optimisation, and digital twin integration patterns.</div><div class="sp-card-footer"><span class="sp-card-link">View Assets →</span><div><span class="badge green">4 Assets</span>&nbsp;<span class="badge amber">1 In Review</span></div></div></div>
+    </div>
+  </div>
+
+  <!-- ══ 15 INNOVATION ══ -->
+  <div class="page" id="page-innovation">
+    <div class="wp-banner" style="background:linear-gradient(135deg,#4A148C 0%,#6A1B9A 50%,#7B1FA2 100%)"><div class="wp-banner-overlay"></div><div class="wp-banner-pattern"></div><div class="wp-banner-content"><div class="wbc-eyebrow">🔬 Section 15</div><div class="wbc-title">Innovation Lab</div><div class="wbc-desc">Emerging technology experiments, research PoCs, and early-stage innovation exploring the frontier of data and AI on Databricks.</div></div></div>
+    <div class="wp-card-grid c3">
+      <div class="sp-card"><div class="sp-card-icon ic-purple">🧠</div><div class="sp-card-title">LLM-Powered Data Discovery</div><div class="sp-card-desc">Natural language interface to Unity Catalog — ask questions about data assets and get instant, governed answers.</div><div class="sp-card-footer"><span class="sp-card-link">View PoC →</span><span class="badge amber">PoC</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-blue">🤖</div><div class="sp-card-title">AI-Assisted Code Review</div><div class="sp-card-desc">Using Databricks Mosaic AI to flag performance anti-patterns and security issues in notebook pull requests.</div><div class="sp-card-footer"><span class="sp-card-link">View PoC →</span><span class="badge amber">PoC</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-teal">📡</div><div class="sp-card-title">Real-Time Feature Serving</div><div class="sp-card-desc">Low-latency feature serving using Databricks Online Tables integrated with Azure Cosmos DB for ML inference.</div><div class="sp-card-footer"><span class="sp-card-link">View Research →</span><span class="badge purple">Research</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-indigo">🌐</div><div class="sp-card-title">Lakehouse Federation</div><div class="sp-card-desc">Exploring Databricks Lakehouse Federation to query Snowflake, BigQuery, and Azure SQL in-place without movement.</div><div class="sp-card-footer"><span class="sp-card-link">View Research →</span><span class="badge purple">Research</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-green">🎯</div><div class="sp-card-title">AutoML Pipeline Generator</div><div class="sp-card-desc">Template generator using Databricks AutoML to produce baseline ML pipelines from raw data inputs.</div><div class="sp-card-footer"><span class="sp-card-link">In Testing →</span><span class="badge green">In Testing</span></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-amber">🔮</div><div class="sp-card-title">Predictive Cost Optimiser</div><div class="sp-card-desc">ML model predicting cluster over-spend before it happens, triggering automated policy adjustments.</div><div class="sp-card-footer"><span class="sp-card-link">View PoC →</span><span class="badge amber">PoC</span></div></div>
+    </div>
+  </div>
+
+  <!-- ══ 16 KNOWLEDGE BASE ══ -->
+  <div class="page" id="page-knowledge">
+    <div class="wp-banner" style="background:linear-gradient(135deg,#006064 0%,#00838F 50%,#0097A7 100%)"><div class="wp-banner-overlay"></div><div class="wp-banner-pattern"></div><div class="wp-banner-content"><div class="wbc-eyebrow">📚 Section 16</div><div class="wbc-title">Knowledge Base &amp; Community</div><div class="wbc-desc">Articles, Q&amp;A threads, expert directory, community channels, and lessons learned from past engagements.</div></div></div>
+    <div class="wp-stat-strip cols-4">
+      <div class="stat-tile"><div class="stat-tile-val brand">312</div><div class="stat-tile-label">KB Articles</div></div>
+      <div class="stat-tile"><div class="stat-tile-val info">87</div><div class="stat-tile-label">Q&amp;A Threads</div></div>
+      <div class="stat-tile"><div class="stat-tile-val amber">24</div><div class="stat-tile-label">Experts Listed</div></div>
+      <div class="stat-tile"><div class="stat-tile-val green">1,200+</div><div class="stat-tile-label">Community Members</div></div>
+    </div>
+    <div class="wp-2col wide-right">
+      <div>
+        <div class="wp-section-hd">Top Articles This Month</div>
+        <div class="wp-news-list">
+          <div class="news-card"><div class="news-card-thumb" style="background:#E3F2FD">⚡</div><div class="news-card-body"><div class="nc-meta"><span class="nc-cat">Performance</span> · J. Chen · 834 views</div><div class="nc-title">Debugging slow Delta Lake reads — a field guide</div><div class="nc-desc">Common causes of slow reads, ZORDER strategies, and file size optimisation patterns.</div></div></div>
+          <div class="news-card"><div class="news-card-thumb" style="background:#FDECEA">🔐</div><div class="news-card-body"><div class="nc-meta"><span class="nc-cat">Governance</span> · P. Williams · 712 views</div><div class="nc-title">Unity Catalog: common permission errors &amp; fixes</div><div class="nc-desc">The top 10 permission errors teams hit during Unity Catalog migrations, with step-by-step resolutions.</div></div></div>
+          <div class="news-card"><div class="news-card-thumb" style="background:#FFF8E1">🔄</div><div class="news-card-body"><div class="nc-meta"><span class="nc-cat">Data Quality</span> · S. Roberts · 601 views</div><div class="nc-title">DLT expectations — patterns &amp; anti-patterns</div><div class="nc-desc">How to write effective DLT expectations, quarantine patterns, and common anti-patterns to avoid.</div></div></div>
+          <div class="news-card"><div class="news-card-thumb" style="background:#E8F5E9">💰</div><div class="news-card-body"><div class="nc-meta"><span class="nc-cat">FinOps</span> · M. Klein · 548 views</div><div class="nc-title">Reducing DBU spend by 30% — 5 practical techniques</div><div class="nc-desc">Real techniques used on production workloads, with before/after cost comparisons.</div></div></div>
+        </div>
+      </div>
+      <div class="right-rail">
+        <div class="rail-card">
+          <div class="rc-title">🤝 Get Involved</div>
+          <div class="wp-card-grid" style="grid-template-columns:1fr;gap:10px;margin:0">
+            <div class="sp-card" style="padding:14px"><div class="sp-card-icon ic-blue" style="width:32px;height:32px;font-size:16px;margin-bottom:8px">💬</div><div class="sp-card-title" style="font-size:13px">Community Slack</div><div class="sp-card-desc">#databricks-coe · #databricks-help<br>1,200+ members</div><div class="sp-card-footer"><span class="sp-card-link">Join →</span></div></div>
+            <div class="sp-card" style="padding:14px"><div class="sp-card-icon ic-amber" style="width:32px;height:32px;font-size:16px;margin-bottom:8px">🗓️</div><div class="sp-card-title" style="font-size:13px">Office Hours</div><div class="sp-card-desc">Every Wednesday 10–11 AM<br>Drop in with any question</div><div class="sp-card-footer"><span class="sp-card-link">Add to Calendar →</span></div></div>
+            <div class="sp-card" style="padding:14px"><div class="sp-card-icon ic-purple" style="width:32px;height:32px;font-size:16px;margin-bottom:8px">👤</div><div class="sp-card-title" style="font-size:13px">Expert Directory</div><div class="sp-card-desc">Find the right SME by topic, technology, or BU</div><div class="sp-card-footer"><span class="sp-card-link">Find an Expert →</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 17 METRICS ══ -->
+  <div class="page" id="page-metrics">
+    <div class="wp-banner green-theme"><div class="wp-banner-overlay"></div><div class="wp-banner-pattern"></div><div class="wp-banner-content"><div class="wbc-eyebrow">📊 Section 17</div><div class="wbc-title">Practice Metrics Dashboard</div><div class="wbc-desc">Platform adoption KPIs, delivery health, financial performance, and community engagement — updated monthly by the CoE team.</div><div class="wbc-meta"><div class="wbc-pill">Last updated: March 5, 2026</div><div class="wbc-pill">Next review: April 1, 2026</div></div></div></div>
+    <div class="wp-stat-strip cols-5">
+      <div class="stat-tile"><div class="stat-tile-val green">47</div><div class="stat-tile-label">Active Projects</div><div class="stat-tile-trend up">↑ 8 this month</div></div>
+      <div class="stat-tile"><div class="stat-tile-val brand">94%</div><div class="stat-tile-label">On-Time Delivery</div><div class="stat-tile-trend up">↑ 3% vs last qtr</div></div>
+      <div class="stat-tile"><div class="stat-tile-val amber">4.6/5</div><div class="stat-tile-label">Client Satisfaction</div></div>
+      <div class="stat-tile"><div class="stat-tile-val green">$2.1M</div><div class="stat-tile-label">Practice Revenue</div><div class="stat-tile-trend up">↑ 18% vs target</div></div>
+      <div class="stat-tile"><div class="stat-tile-val red">3</div><div class="stat-tile-label">At-Risk Projects</div><div class="stat-tile-trend dn">↓ Requires attention</div></div>
+    </div>
+    <div class="wp-2col">
+      <div>
+        <div class="wp-section-hd">Platform Adoption</div>
+        <div class="wp-progress-list">
+          <div class="wp-prog-item"><div class="wp-prog-hd"><span class="wp-prog-label">Unity Catalog Adoption</span><span class="wp-prog-pct" style="color:var(--brand)">74%</span></div><div class="wp-prog-bar"><div class="wp-prog-fill" style="width:74%;background:var(--brand)"></div></div></div>
+          <div class="wp-prog-item"><div class="wp-prog-hd"><span class="wp-prog-label">Cluster Policy Compliance</span><span class="wp-prog-pct" style="color:var(--success)">88%</span></div><div class="wp-prog-bar"><div class="wp-prog-fill" style="width:88%;background:var(--success)"></div></div></div>
+          <div class="wp-prog-item"><div class="wp-prog-hd"><span class="wp-prog-label">Delta Live Tables Adoption</span><span class="wp-prog-pct" style="color:var(--warn)">42%</span></div><div class="wp-prog-bar"><div class="wp-prog-fill" style="width:42%;background:var(--warn)"></div></div></div>
+          <div class="wp-prog-item"><div class="wp-prog-hd"><span class="wp-prog-label">MLflow Registry Usage</span><span class="wp-prog-pct" style="color:var(--info)">61%</span></div><div class="wp-prog-bar"><div class="wp-prog-fill" style="width:61%;background:var(--info)"></div></div></div>
+          <div class="wp-prog-item"><div class="wp-prog-hd"><span class="wp-prog-label">Resource Tagging Coverage</span><span class="wp-prog-pct" style="color:var(--db-red)">94%</span></div><div class="wp-prog-bar"><div class="wp-prog-fill" style="width:94%;background:var(--db-red)"></div></div></div>
+        </div>
+        <div class="wp-section-hd">Financial Performance</div>
+        <div class="wp-stat-strip cols-4" style="margin-bottom:0">
+          <div class="stat-tile"><div class="stat-tile-val amber">$142K</div><div class="stat-tile-label">Monthly DBU</div></div>
+          <div class="stat-tile"><div class="stat-tile-val green">-23%</div><div class="stat-tile-label">YoY Cost Reduction</div></div>
+          <div class="stat-tile"><div class="stat-tile-val brand">$2.1M</div><div class="stat-tile-label">Practice Revenue</div></div>
+          <div class="stat-tile"><div class="stat-tile-val green">+18%</div><div class="stat-tile-label">vs Revenue Target</div></div>
+        </div>
+      </div>
+      <div class="right-rail">
+        <div class="rail-card">
+          <div class="rc-title">📅 Upcoming Events</div>
+          <div class="rc-event"><div class="rc-date"><div class="rc-day">12</div><div class="rc-month">Mar</div></div><div><div class="rc-event-name">CoE Office Hours</div><div class="rc-event-time">10:00–11:00 AM · Teams</div></div></div>
+          <div class="rc-event"><div class="rc-date"><div class="rc-day">18</div><div class="rc-month">Mar</div></div><div><div class="rc-event-name">DLT Workshop: Hands-On Lab</div><div class="rc-event-time">2:00–4:00 PM · Virtual</div></div></div>
+          <div class="rc-event"><div class="rc-date"><div class="rc-day">25</div><div class="rc-month">Mar</div></div><div><div class="rc-event-name">Quarterly Governance Review</div><div class="rc-event-time">9:00 AM · Conf Room B</div></div></div>
+        </div>
+        <div class="rail-card">
+          <div class="rc-title">🏆 Recent Wins</div>
+          <div style="display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--n600)">
+            <div>✅ Cluster standardisation — 23% cost saving (Q1)</div>
+            <div>✅ Unity Catalog rolled out to 6 BUs</div>
+            <div>✅ Runtime 15.1 LTS approved for production</div>
+            <div>✅ Hackathon 2026 — 14 projects submitted</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /page-canvas -->
+</div><!-- /main -->
+</div><!-- /app-body -->
+
+<script>
+const pageLabels = {
+  home:'Home',about:'01 · About CoE & Engagement',fundamentals:'02 · Azure Databricks Fundamentals',
+  training:'03 · Training & Certification',presales:'04 · Pre-Sales & Solution Engineering',
+  sales:'05 · Sales Enablement',delivery:'06 · Delivery & Implementation',
+  greenfield:'07 · Greenfield Implementation Kit',migration:'08 · Migration Factory',
+  devops:'09 · DevOps & Engineering Standards',security:'10 · Security & Governance',
+  operations:'11 · Operations & Support',finops:'12 · Cost Optimization & FinOps',
+  accelerators:'13 · Accelerators & Reusable Assets',industry:'14 · Industry Solutions',
+  innovation:'15 · Innovation Lab',knowledge:'16 · Knowledge Base & Community',
+  metrics:'17 · Practice Metrics Dashboard'
+};
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const t=document.getElementById('page-'+id);
+  if(t)t.classList.add('active');
+
+  // Update left nav items
+  document.querySelectorAll('.lnav-item,.lnav-home').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.lnav-item,.lnav-home').forEach(n=>{
+    const oc=n.getAttribute('onclick')||'';
+    if(oc.includes("'"+id+"'"))n.classList.add('active');
+  });
+
+  // Update top nav
+  document.querySelectorAll('.sp-navlink').forEach(n=>n.classList.remove('active'));
+
+  // Breadcrumb
+  document.getElementById('bc-current').textContent=pageLabels[id]||id;
+
+  // Scroll reset
+  document.getElementById('main-scroll').scrollTop=0;
+}
+
+function toggleGroup(id){
+  document.getElementById(id).classList.toggle('open');
+}
+</script>
+</body>
+</html>
