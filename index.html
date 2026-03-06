@@ -166,6 +166,37 @@ button{font-family:var(--font);cursor:pointer;}
 .sp-cmd-btn.accent:hover{background:#C62828;}
 
 /* ═══════════════════════════════════════════
+   SIDEBAR TOGGLE BUTTON (desktop)
+═══════════════════════════════════════════ */
+.lnav-toggle-btn{
+  width:32px;height:32px;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  border:none;background:rgba(255,255,255,.15);
+  color:#fff;font-size:17px;cursor:pointer;
+  transition:background .15s;flex-shrink:0;
+  margin-right:4px;
+}
+.lnav-toggle-btn:hover{background:rgba(255,255,255,.28);}
+
+/* Mobile hamburger (suite bar) */
+.mob-menu-btn{
+  display:none;
+  width:32px;height:32px;border-radius:4px;
+  align-items:center;justify-content:center;
+  border:none;background:transparent;
+  color:rgba(255,255,255,.85);font-size:18px;cursor:pointer;
+  transition:background .15s;
+}
+.mob-menu-btn:hover{background:rgba(255,255,255,.1);}
+
+/* Mobile overlay backdrop */
+.lnav-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.45);z-index:149;
+}
+.lnav-overlay.visible{display:block;}
+
+/* ═══════════════════════════════════════════
    APP BODY
 ═══════════════════════════════════════════ */
 .app-body{display:flex;flex:1;overflow:hidden;}
@@ -179,7 +210,11 @@ button{font-family:var(--font);cursor:pointer;}
   border-right:1px solid var(--n200);
   display:flex;flex-direction:column;
   overflow:hidden;flex-shrink:0;
+  transition:width .25s ease, transform .25s ease;
+  z-index:150;
 }
+/* Collapsed state — desktop */
+.lnav.collapsed{width:0;border-right:none;}
 .lnav-inner{overflow-y:auto;flex:1;padding:12px 0 20px;}
 .lnav-inner::-webkit-scrollbar{width:4px;}
 .lnav-inner::-webkit-scrollbar-thumb{background:var(--n300);border-radius:2px;}
@@ -640,6 +675,170 @@ button{font-family:var(--font);cursor:pointer;}
 /* Page hidden by default */
 .page{display:none;}
 .page.active{display:block;}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE — TABLET  (≤ 1024px)
+═══════════════════════════════════════════ */
+@media(max-width:1024px){
+  :root{ --lnav-w:260px; }
+
+  /* Stat strips */
+  .wp-stat-strip.cols-5{ grid-template-columns:repeat(3,1fr); }
+  .wp-stat-strip.cols-4{ grid-template-columns:repeat(2,1fr); }
+
+  /* Card grids */
+  .wp-card-grid.c4{ grid-template-columns:repeat(2,1fr); }
+  .wp-card-grid.c3{ grid-template-columns:repeat(2,1fr); }
+
+  /* Home tiles */
+  .nav-tile-grid{ grid-template-columns:repeat(3,1fr); }
+
+  /* Two-col layout — stack right rail below */
+  .wp-2col,.wp-2col.wide-right{
+    grid-template-columns:1fr;
+  }
+  .right-rail{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
+
+  /* People grid */
+  .wp-people-grid{ grid-template-columns:repeat(3,1fr); }
+
+  /* Tier cards */
+  .tier-cards{ grid-template-columns:repeat(3,1fr); }
+
+  /* SP top nav — hide some links */
+  .sp-nav-links .sp-navlink:nth-child(n+5){ display:none; }
+  .sp-cmd-btn:not(.accent){ display:none; }
+
+  /* Suite bar search shrink */
+  .sb-search{ width:160px; }
+
+  /* Page canvas padding */
+  .page-canvas{ padding:20px 24px 40px; }
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE — MOBILE  (≤ 768px)
+═══════════════════════════════════════════ */
+@media(max-width:768px){
+
+  /* Body scrollable on mobile */
+  html,body{ overflow:auto; height:auto; }
+  .app-body{ overflow:visible; height:auto; }
+  .main{ overflow:visible; height:auto; }
+
+  /* ── Suite bar ── */
+  .sb-search{ display:none; }
+  .sb-site{ display:none; }
+  .sb-divider{ display:none; }
+  .mob-menu-btn{ display:flex; }
+
+  /* ── SP site navbar ── */
+  .sp-navbar{ padding:0 12px; }
+  .sp-nav-links{ display:none; }
+  .sp-site-name{ font-size:15px; padding:0 8px; }
+  .sp-nav-right{ display:none; }
+
+  /* ── Left nav becomes full-height overlay drawer ── */
+  .lnav{
+    position:fixed;
+    top:0; left:0;
+    height:100vh;
+    width:var(--lnav-w) !important;
+    transform:translateX(-100%);
+    border-right:1px solid var(--n200);
+    box-shadow:var(--shadow-lg);
+    z-index:200;
+  }
+  .lnav.mob-open{
+    transform:translateX(0);
+  }
+  /* hide desktop collapsed state on mobile */
+  .lnav.collapsed{ width:var(--lnav-w) !important; }
+  /* toggle btn hidden on mobile (using mob-menu-btn instead) */
+  .lnav-toggle-btn{ display:none; }
+
+  /* ── Page canvas ── */
+  .page-canvas{ padding:16px 14px 40px; }
+
+  /* ── Banner ── */
+  .wp-banner{ min-height:160px; }
+  .wp-banner-content{ padding:20px 18px; }
+  .wbc-title{ font-size:20px; }
+  .wbc-desc{ font-size:12px; }
+  .wbc-meta{ gap:8px; }
+  .wbc-actions{ flex-wrap:wrap; }
+  .wbc-btn{ padding:7px 14px; font-size:12px; }
+
+  /* ── Stat strips ── */
+  .wp-stat-strip.cols-5,
+  .wp-stat-strip.cols-4{ grid-template-columns:repeat(2,1fr); }
+
+  /* ── Card grids ── */
+  .wp-card-grid.c4,
+  .wp-card-grid.c3,
+  .wp-card-grid.c2{ grid-template-columns:1fr; }
+
+  /* Featured card stacks vertically */
+  .sp-card.featured{ flex-direction:column; gap:12px; }
+
+  /* ── Home nav tiles ── */
+  .nav-tile-grid{ grid-template-columns:repeat(2,1fr); gap:10px; }
+
+  /* ── Two-col layouts ── */
+  .wp-2col,.wp-2col.wide-right{ grid-template-columns:1fr; }
+  .right-rail{ display:grid; grid-template-columns:1fr; gap:12px; }
+
+  /* ── Tier cards ── */
+  .tier-cards{ grid-template-columns:1fr; }
+
+  /* ── People grid ── */
+  .wp-people-grid{ grid-template-columns:repeat(2,1fr); }
+
+  /* ── Document table horizontal scroll ── */
+  .sp-doc-table{ overflow-x:auto; }
+  .sdt-cols-4,.sdt-cols-5{
+    grid-template-columns:200px 100px 80px 80px;
+    min-width:480px;
+  }
+
+  /* ── Page command bar ── */
+  .page-cmdbar{ padding:0 14px; }
+  .pcb-actions .pcb-btn:not(.primary){ display:none; }
+
+  /* ── Quick links wraps tightly ── */
+  .wql-grid{ gap:6px; }
+  .wql-item{ font-size:12px; padding:6px 10px; }
+
+  /* ── Progress list ── */
+  .wp-progress-list{ padding:16px; }
+
+  /* ── Alert ── */
+  .wp-alert{ flex-wrap:wrap; gap:8px; }
+  .wp-alert-action{ width:100%; }
+
+  /* ── News cards ── */
+  .news-card{ flex-direction:column; }
+  .news-card-thumb{ width:36px; height:36px; font-size:18px; }
+
+  /* ── Stat tile font ── */
+  .stat-tile-val{ font-size:22px; }
+  .stat-tile{ padding:14px 16px; }
+
+  /* ── Rail cards full width ── */
+  .rail-card{ padding:14px; }
+  .rc-title{ font-size:11px; }
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE — SMALL MOBILE  (≤ 400px)
+═══════════════════════════════════════════ */
+@media(max-width:400px){
+  .nav-tile-grid{ grid-template-columns:1fr; }
+  .wp-stat-strip.cols-5,
+  .wp-stat-strip.cols-4{ grid-template-columns:1fr 1fr; }
+  .wbc-title{ font-size:17px; }
+  .sp-site-name{ font-size:13px; }
+}
 </style>
 </head>
 <body>
@@ -648,13 +847,14 @@ button{font-family:var(--font);cursor:pointer;}
      M365 SUITE BAR
 ═══════════════════════════════════ -->
 <div class="suite-bar">
+  <button class="mob-menu-btn" onclick="toggleMobileNav()" title="Menu" aria-label="Open navigation">☰</button>
   <button class="sb-waffle">⠿</button>
   <div class="sb-logo">
     <div class="sb-logo-dot"><span></span><span></span><span></span><span></span></div>
     SharePoint
   </div>
   <div class="sb-divider"></div>
-  <span class="sb-site">TGH</span>
+  <span class="sb-site">Acme Corp Intranet</span>
   <div style="margin-left:16px;">
     <input class="sb-search" placeholder="Search SharePoint…">
   </div>
@@ -670,6 +870,9 @@ button{font-family:var(--font);cursor:pointer;}
      SP SITE NAVIGATION BAR
 ═══════════════════════════════════ -->
 <div class="sp-navbar">
+  <button class="lnav-toggle-btn" onclick="toggleDesktopNav()" title="Toggle navigation" aria-label="Toggle sidebar">
+    <svg width="16" height="14" viewBox="0 0 16 14" fill="currentColor"><rect y="0" width="16" height="2" rx="1"/><rect y="6" width="16" height="2" rx="1"/><rect y="12" width="16" height="2" rx="1"/></svg>
+  </button>
   <span class="sp-site-name">Databricks CoE</span>
   <nav class="sp-nav-links">
     <span class="sp-navlink active" onclick="showPage('home')">Home</span>
@@ -691,7 +894,7 @@ button{font-family:var(--font);cursor:pointer;}
 <div class="app-body">
 
 <!-- ── LEFT NAVIGATION ── -->
-<nav class="lnav">
+<nav class="lnav" id="lnav">
   <div class="lnav-inner">
     <div class="lnav-home active" id="lnav-home" onclick="showPage('home')">
       <span class="li-icon">🏠</span>
@@ -774,7 +977,7 @@ button{font-family:var(--font);cursor:pointer;}
     <div class="lf-label">CoE Ownership</div>
     <div class="lf-person">
       <div class="lf-avatar">SR</div>
-      <div><div class="lf-name">SR</div><div class="lf-role">CoE Lead · Platform Architect</div></div>
+      <div><div class="lf-name">Sarah Roberts</div><div class="lf-role">CoE Lead · Platform Architect</div></div>
     </div>
   </div>
 </nav>
@@ -921,10 +1124,10 @@ button{font-family:var(--font);cursor:pointer;}
         <div class="rail-card">
           <div class="rc-title">👥 CoE Team</div>
           <div style="display:flex;flex-direction:column;gap:8px;">
-            <div style="display:flex;align-items:center;gap:8px;"><div class="lf-avatar" style="background:#C62828;font-size:11px">SR</div><div><div class="lf-name">SR</div><div class="lf-role">CoE Lead</div></div></div>
-            <div style="display:flex;align-items:center;gap:8px;"><div class="lf-avatar" style="background:#1565C0;font-size:11px">JC</div><div><div class="lf-name">JC</div><div class="lf-role">ML Engineering Lead</div></div></div>
-            <div style="display:flex;align-items:center;gap:8px;"><div class="lf-avatar" style="background:#1B5E20;font-size:11px">PW</div><div><div class="lf-name">PW</div><div class="lf-role">Data Governance</div></div></div>
-            <div style="display:flex;align-items:center;gap:8px;"><div class="lf-avatar" style="background:#6A1B9A;font-size:11px">MK</div><div><div class="lf-name">MK</div><div class="lf-role">FinOps &amp; Optimization</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px;"><div class="lf-avatar" style="background:#C62828;font-size:11px">SR</div><div><div class="lf-name">Sarah Roberts</div><div class="lf-role">CoE Lead</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px;"><div class="lf-avatar" style="background:#1565C0;font-size:11px">JC</div><div><div class="lf-name">James Chen</div><div class="lf-role">ML Engineering Lead</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px;"><div class="lf-avatar" style="background:#1B5E20;font-size:11px">PW</div><div><div class="lf-name">Priya Williams</div><div class="lf-role">Data Governance</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px;"><div class="lf-avatar" style="background:#6A1B9A;font-size:11px">MK</div><div><div class="lf-name">Marco Klein</div><div class="lf-role">FinOps &amp; Optimization</div></div></div>
           </div>
         </div>
       </div>
@@ -1290,6 +1493,8 @@ button{font-family:var(--font);cursor:pointer;}
 </div><!-- /main -->
 </div><!-- /app-body -->
 
+<div class="lnav-overlay" id="lnav-overlay" onclick="toggleMobileNav()"></div>
+
 <script>
 const pageLabels = {
   home:'Home',about:'01 · About CoE & Engagement',fundamentals:'02 · Azure Databricks Fundamentals',
@@ -1303,31 +1508,95 @@ const pageLabels = {
   metrics:'17 · Practice Metrics Dashboard'
 };
 
-function showPage(id){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  const t=document.getElementById('page-'+id);
-  if(t)t.classList.add('active');
-
-  // Update left nav items
-  document.querySelectorAll('.lnav-item,.lnav-home').forEach(n=>n.classList.remove('active'));
-  document.querySelectorAll('.lnav-item,.lnav-home').forEach(n=>{
-    const oc=n.getAttribute('onclick')||'';
-    if(oc.includes("'"+id+"'"))n.classList.add('active');
-  });
-
-  // Update top nav
-  document.querySelectorAll('.sp-navlink').forEach(n=>n.classList.remove('active'));
-
-  // Breadcrumb
-  document.getElementById('bc-current').textContent=pageLabels[id]||id;
-
-  // Scroll reset
-  document.getElementById('main-scroll').scrollTop=0;
+/* ── Desktop sidebar collapse/expand ── */
+function toggleDesktopNav(){
+  const nav = document.getElementById('lnav');
+  nav.classList.toggle('collapsed');
+  // persist state
+  const isCollapsed = nav.classList.contains('collapsed');
+  localStorage.setItem('coe-nav-collapsed', isCollapsed);
 }
 
+/* ── Mobile drawer open/close ── */
+function toggleMobileNav(){
+  const nav = document.getElementById('lnav');
+  const overlay = document.getElementById('lnav-overlay');
+  const isOpen = nav.classList.contains('mob-open');
+  if(isOpen){
+    nav.classList.remove('mob-open');
+    overlay.classList.remove('visible');
+    document.body.style.overflow = '';
+  } else {
+    nav.classList.add('mob-open');
+    overlay.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+/* ── Navigate to page ── */
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const t = document.getElementById('page-'+id);
+  if(t) t.classList.add('active');
+
+  // Update left nav active state
+  document.querySelectorAll('.lnav-item,.lnav-home').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.lnav-item,.lnav-home').forEach(n=>{
+    const oc = n.getAttribute('onclick') || '';
+    if(oc.includes("'"+id+"'")) n.classList.add('active');
+  });
+
+  // Update top nav active state
+  document.querySelectorAll('.sp-navlink').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.sp-navlink').forEach(n=>{
+    const oc = n.getAttribute('onclick') || '';
+    if(oc.includes("'"+id+"'")) n.classList.add('active');
+  });
+
+  // Breadcrumb
+  document.getElementById('bc-current').textContent = pageLabels[id] || id;
+
+  // Scroll reset
+  const scroller = document.getElementById('main-scroll');
+  if(scroller) scroller.scrollTop = 0;
+  else window.scrollTo(0,0);
+
+  // Close mobile drawer on navigation
+  const nav = document.getElementById('lnav');
+  const overlay = document.getElementById('lnav-overlay');
+  if(nav.classList.contains('mob-open')){
+    nav.classList.remove('mob-open');
+    overlay.classList.remove('visible');
+    document.body.style.overflow = '';
+  }
+}
+
+/* ── Collapse/expand nav groups ── */
 function toggleGroup(id){
   document.getElementById(id).classList.toggle('open');
 }
+
+/* ── Restore sidebar collapse state on load ── */
+(function(){
+  const wasCollapsed = localStorage.getItem('coe-nav-collapsed') === 'true';
+  if(wasCollapsed){
+    const nav = document.getElementById('lnav');
+    if(nav) nav.classList.add('collapsed');
+  }
+})();
+
+/* ── Close mobile nav on ESC ── */
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape'){
+    const nav = document.getElementById('lnav');
+    const overlay = document.getElementById('lnav-overlay');
+    if(nav.classList.contains('mob-open')){
+      nav.classList.remove('mob-open');
+      overlay.classList.remove('visible');
+      document.body.style.overflow = '';
+    }
+  }
+});
 </script>
 </body>
 </html>
