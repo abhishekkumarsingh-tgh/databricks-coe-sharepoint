@@ -1264,12 +1264,107 @@ button{font-family:var(--font);cursor:pointer;}
       <div class="wp-banner-content">
         <div class="wbc-eyebrow">⚡ Section 02</div>
         <div class="wbc-title">Azure Databricks Fundamentals Hub</div>
-        <div class="wbc-desc">Everything newcomers need to understand the Databricks Lakehouse platform and its Azure integrations — from medallion architecture principles to workspace topology and storage patterns.</div>
+        <div class="wbc-desc">Everything newcomers need to understand the Databricks Lakehouse platform — from workspace creation and compute selection to medallion architecture, Azure integrations, and workspace topology.</div>
         <div class="wbc-meta">
+          <div class="wbc-pill">🖥️ Workspace Setup</div><div class="wbc-pill">⚙️ Compute Selection</div>
           <div class="wbc-pill">🧱 Lakehouse Architecture</div><div class="wbc-pill">🔗 Azure Integration Map</div>
           <div class="wbc-pill">📊 Workspace Types</div><div class="wbc-pill">🌐 Networking Patterns</div>
         </div>
       </div>
+    </div>
+
+    <!-- Workspace Creation -->
+    <div class="wp-section-hd">🖥️ Creating an Azure Databricks Workspace</div>
+    <div class="wp-card-grid c2">
+      <div class="sp-card">
+        <div class="sp-card-icon ic-blue">🔧</div>
+        <div class="sp-card-title">Azure CLI Provisioning</div>
+        <div class="sp-card-desc">
+          Create workspaces via Azure CLI for repeatable, scripted deployments.<br><br>
+          <code style="background:var(--n100);padding:2px 6px;border-radius:3px;font-size:11px;display:block;margin-bottom:6px">az databricks workspace create \<br>&nbsp;&nbsp;--resource-group myresourcegroup \<br>&nbsp;&nbsp;--name mydatabricksws \<br>&nbsp;&nbsp;--location uksouth \<br>&nbsp;&nbsp;--sku premium</code>
+          <strong>Pricing Tiers:</strong> Standard (basic), <strong>Premium</strong> (RBAC, Unity Catalog — CoE standard), or Trial (14-day free).<br>
+          Premium is <em>mandatory</em> for Unity Catalog and row-level security.
+        </div>
+        <div class="sp-card-footer"><a class="sp-card-link" href="https://docs.microsoft.com/en-us/cli/azure/databricks" target="_blank">CLI Reference →</a><span class="badge green">Approved</span></div>
+      </div>
+      <div class="sp-card">
+        <div class="sp-card-icon ic-teal">🤖</div>
+        <div class="sp-card-title">Databricks Assistant (AI Pair Programmer)</div>
+        <div class="sp-card-desc">
+          Databricks Assistant is the built-in AI pair programmer available in every notebook. Key capabilities:<br><br>
+          • Generate code from natural language comments<br>
+          • Explain existing code and suggest fixes<br>
+          • Debug errors with contextual guidance<br>
+          • Create visualisations from data<br>
+          • Access documentation inline<br><br>
+          The Assistant uses your Unity Catalog metadata for context-aware, schema-specific suggestions.
+        </div>
+        <div class="sp-card-footer"><a class="sp-card-link" href="https://docs.databricks.com/en/notebooks/databricks-assistant.html" target="_blank">Assistant Guide →</a><span class="badge teal">AI Feature</span></div>
+      </div>
+    </div>
+
+    <!-- Compute Selection Guide -->
+    <div class="wp-section-hd">⚙️ Compute Selection Guide</div>
+    <div class="wp-alert info" style="margin-bottom:16px">
+      <span class="wp-alert-icon">💡</span>
+      <div class="wp-alert-body"><strong>CoE Guidance:</strong> Default to Serverless compute for new workloads — 2–6 second startup, zero management overhead, and scales to zero. Only use Classic compute when you need RDD APIs, R language, GPU instances, or custom containers.</div>
+    </div>
+    <div class="sp-doc-table">
+      <div class="sdt-header sdt-cols-4"><span>Compute Type</span><span>Best For</span><span>Startup / Cost</span><span>CoE Status</span></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">⚡</span>Serverless Compute</div><div class="sdt-cell">Interactive dev, ETL jobs, BI workloads — no cluster config needed</div><div class="sdt-cell">⚡ 2–6 sec · scales to zero · pay-per-use</div><div class="sdt-cell"><span class="badge green">Preferred Default</span></div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">🖥️</span>Classic (Standard Access)</div><div class="sdt-cell">Collaborative data engineering, shared analytics teams</div><div class="sdt-cell">⏱️ 3–7 min · multi-user cost sharing</div><div class="sdt-cell"><span class="badge blue">Approved</span></div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">🔒</span>Classic (Single-User)</div><div class="sdt-cell">RDD workloads, GPU jobs, R language, custom containers</div><div class="sdt-cell">⏱️ 3–7 min · single-user only · higher cost</div><div class="sdt-cell"><span class="badge amber">Use Case Specific</span></div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">🏊</span>Instance Pools</div><div class="sdt-cell">Teams that create/destroy clusters frequently (&ge;5×/day)</div><div class="sdt-cell">🚀 &lt;1 min · idle cost for pre-warmed VMs</div><div class="sdt-cell"><span class="badge amber">Justify Idle Cost</span></div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">📊</span>SQL Warehouse (Serverless)</div><div class="sdt-cell">SQL analytics, BI dashboards, reporting, Genie Spaces</div><div class="sdt-cell">⚡ 2–6 sec · Photon + Predictive IO included</div><div class="sdt-cell"><span class="badge green">Preferred for SQL</span></div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">🔷</span>SQL Warehouse (Pro)</div><div class="sdt-cell">SQL + custom networking, data federation, OAuth sources</div><div class="sdt-cell">⏱️ ~4 min · custom networking required</div><div class="sdt-cell"><span class="badge blue">When Needed</span></div></div>
+    </div>
+
+    <!-- Node Type & Autoscaling -->
+    <div class="wp-card-grid c2" style="margin-bottom:24px">
+      <div class="sp-card">
+        <div class="sp-card-icon ic-amber">📐</div>
+        <div class="sp-card-title">VM Node Type Selection</div>
+        <div class="sp-card-desc">
+          Match VM family to workload characteristics:<br><br>
+          <strong>Memory-optimised (E-series):</strong> Large joins, wide aggregations, caching — e.g. multi-table joins on millions of rows.<br>
+          <strong>Compute-optimised (F-series):</strong> CPU-intensive transformations with modest memory needs.<br>
+          <strong>Storage-optimised (L-series):</strong> Repeated scans of very large files (genomics, logs).<br>
+          <strong>GPU (NC/ND-series):</strong> Deep learning, image/NLP model training — use Databricks Runtime ML.<br><br>
+          <em>Always use LTS runtimes for production.</em> Current CoE standard: <strong>15.4 LTS</strong>.
+        </div>
+        <div class="sp-card-footer"><a class="sp-card-link" href="https://docs.databricks.com/en/compute/cluster-config-best-practices.html" target="_blank">Sizing Guide →</a><span class="badge amber">Reference</span></div>
+      </div>
+      <div class="sp-card">
+        <div class="sp-card-icon ic-green">📉</div>
+        <div class="sp-card-title">Autoscaling &amp; Cost Controls</div>
+        <div class="sp-card-desc">
+          <strong>Autoscaling:</strong> Set min/max workers — Databricks scales automatically. Typical saving: 40–60% vs. fixed-size clusters for variable workloads.<br><br>
+          <strong>Auto-termination:</strong> Dev clusters = 45 min. Shared team clusters = 60 min. Production jobs = after completion.<br><br>
+          <strong>Spot instances:</strong> Use Azure Spot VMs for worker nodes (up to 90% saving). <em>Always keep the driver node on-demand</em> — driver failure terminates the whole cluster.<br><br>
+          <strong>Avoid for:</strong> real-time patient monitoring, SLA-critical apps, interactive executive dashboards.
+        </div>
+        <div class="sp-card-footer"><a class="sp-card-link" href="https://docs.databricks.com/en/compute/configure.html" target="_blank">Config Guide →</a><span class="badge green">Cost Saving</span></div>
+      </div>
+    </div>
+
+    <!-- Library Management -->
+    <div class="wp-section-hd">📦 Library Installation &amp; Management</div>
+    <div class="sp-doc-table">
+      <div class="sdt-header sdt-cols-4"><span>Library Source</span><span>How to Install</span><span>Scope</span><span>CoE Guidance</span></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">🐍</span>PyPI Package</div><div class="sdt-cell">Compute → Libraries → Install New → PyPI. Always pin version: <code>pandas==2.1.0</code></div><div class="sdt-cell">Cluster-scoped (persistent) or notebook-scoped (temporary)</div><div class="sdt-cell"><span class="badge green">Standard — pin versions in prod</span></div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">☕</span>Maven / JAR</div><div class="sdt-cell">Compute → Libraries → Install New → Maven coordinates</div><div class="sdt-cell">Cluster-scoped. Requires allowlist on Standard access clusters</div><div class="sdt-cell"><span class="badge amber">Admin must allowlist first</span></div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">📁</span>Unity Catalog Volume</div><div class="sdt-cell">Upload .whl to UC Volume, install via path: <code>/Volumes/catalog/schema/vol/lib.whl</code></div><div class="sdt-cell">Cluster-scoped. UC permissions control access &amp; audit trail</div><div class="sdt-cell"><span class="badge green">Preferred for internal libs</span></div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">📋</span>requirements.txt</div><div class="sdt-cell">Upload to Volume or Workspace Files, install via Requirements source</div><div class="sdt-cell">Cluster-scoped. Installs all packages in one step</div><div class="sdt-cell"><span class="badge blue">Use for complex environments</span></div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">🔧</span>Init Scripts</div><div class="sdt-cell">Cluster Advanced Options → Init Scripts. Store in UC Volume</div><div class="sdt-cell">Runs at cluster startup. For system-level config only, not library installs</div><div class="sdt-cell"><span class="badge amber">Security review required</span></div></div>
+    </div>
+
+    <!-- Compute Permissions -->
+    <div class="wp-section-hd">🔑 Compute Permission Levels</div>
+    <div class="sp-doc-table" style="margin-bottom:24px">
+      <div class="sdt-header sdt-cols-4"><span>Permission Level</span><span>Can Do</span><span>Cannot Do</span><span>Typical Role</span></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">👁️</span>CAN ATTACH TO</div><div class="sdt-cell">Attach notebooks, run queries, view Spark UI &amp; metrics</div><div class="sdt-cell">Restart, edit config, manage permissions or libraries</div><div class="sdt-cell">Data Analyst</div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">🔄</span>CAN RESTART</div><div class="sdt-cell">All of CAN ATTACH TO + restart &amp; terminate cluster</div><div class="sdt-cell">Edit config, install libraries, manage permissions</div><div class="sdt-cell">Senior Data Engineer</div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">⚙️</span>CAN MANAGE</div><div class="sdt-cell">Full control: edit config, install libraries, manage permissions</div><div class="sdt-cell">—</div><div class="sdt-cell">Team Lead / Platform Engineer</div></div>
     </div>
 
     <!-- Lakehouse Architecture -->
@@ -1459,6 +1554,30 @@ button{font-family:var(--font);cursor:pointer;}
       <div class="sp-card"><div class="sp-card-icon ic-purple">🧬</div><div class="sp-card-title">Lab 4 — Feature Engineering Pipeline</div><div class="sp-card-desc">Build a feature engineering pipeline that reads from Silver Delta tables, engineers features using Spark transformations, and writes feature groups to the Databricks Feature Store. Register features with lineage to the Unity Catalog. Generate a training dataset for an ML model.</div><div style="margin-top:8px;font-size:11px;color:var(--n500)">~3 hours · Advanced · Feature Store access required</div><div class="sp-card-footer"><a class="sp-card-link" href="https://docs.databricks.com/en/getting-started/index.html" target="_blank">Open Lab →</a><span class="badge purple">Feature Store</span></div></div>
       <div class="sp-card"><div class="sp-card-icon ic-red">🚀</div><div class="sp-card-title">Lab 5 — Model Deployment: Batch &amp; Real-Time</div><div class="sp-card-desc">Take a trained MLflow model from the UC Model Registry and deploy it via two patterns: (1) Batch inference using a Databricks Workflow job with mlflow.pyfunc.load_model, and (2) Real-time serving using Databricks Model Serving endpoint with REST API invocation and monitoring via Inference Tables.</div><div style="margin-top:8px;font-size:11px;color:var(--n500)">~4 hours · Advanced · Model Serving enabled workspace</div><div class="sp-card-footer"><a class="sp-card-link" href="https://docs.databricks.com/en/getting-started/index.html" target="_blank">Open Lab →</a><span class="badge red">Model Serving</span></div></div>
       <div class="sp-card"><div class="sp-card-icon ic-green">🏗️</div><div class="sp-card-title">Lab 6 — CI/CD Pipeline with DABs</div><div class="sp-card-desc">Set up a full Databricks Asset Bundle (DAB) deployment pipeline using Azure DevOps. Build→validate→deploy to dev→integration test→approval gate→deploy to prod. Covers environment-specific overrides, pipeline YAML authoring, and PR gating on test failure.</div><div style="margin-top:8px;font-size:11px;color:var(--n500)">~3 hours · Advanced · Azure DevOps access required</div><div class="sp-card-footer"><a class="sp-card-link" href="https://docs.databricks.com/en/getting-started/index.html" target="_blank">Open Lab →</a><span class="badge green">CI/CD + DABs</span></div></div>
+    </div>
+
+    <!-- DP-750 Course Modules -->
+    <div class="wp-section-hd">📚 DP-750 Course: Implement Data Engineering Solutions using Azure Databricks</div>
+    <div class="wp-alert info" style="margin-bottom:16px">
+      <span class="wp-alert-icon">🎯</span>
+      <div class="wp-alert-body"><strong>Official Microsoft Course DP-750.</strong> 13 hands-on demo modules with real-world industry scenarios. Each module maps directly to the Databricks Certified Data Engineer exam domains. Complete all 13 to qualify for the exam voucher programme.</div>
+      <a class="wp-alert-action" href="https://learn.microsoft.com/en-us/training/courses/dp-750t00" target="_blank">Course Overview →</a>
+    </div>
+    <div class="sp-doc-table" style="margin-bottom:24px">
+      <div class="sdt-header sdt-cols-4"><span>Module</span><span>Industry Scenario</span><span>Key Topics</span><span>Status</span></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">01</span>Explore Azure Databricks</div><div class="sdt-cell">General — workspace basics</div><div class="sdt-cell">Workspace creation (CLI/PS), notebook magic commands, SQL workloads, Databricks Assistant, Unity Catalog Explorer</div><div class="sdt-cell"><span class="badge green">Available</span></div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">02</span>Select &amp; Configure Compute</div><div class="sdt-cell">🏥 MedTech Analytics — Healthcare data</div><div class="sdt-cell">Compute types comparison, autoscaling, spot instances, node type selection, library installation, access permissions</div><div class="sdt-cell"><span class="badge green">Available</span></div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">03</span>Create &amp; Organise UC Objects</div><div class="sdt-cell">🎓 University Data Platform — Higher Ed</div><div class="sdt-cell">Naming conventions, catalogs/schemas/tables/views, volumes, DDL operations, foreign catalogs, AI/BI Genie config</div><div class="sdt-cell"><span class="badge green">Available</span></div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">04</span>Secure Unity Catalog Objects</div><div class="sdt-cell">🛒 RetailNow — Omnichannel Retail</div><div class="sdt-cell">Query lifecycle, GRANT/REVOKE, column masking, row filtering, dynamic views, AKV secrets, service principals, managed identities</div><div class="sdt-cell"><span class="badge green">Available</span></div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">05</span>Govern Unity Catalog Objects</div><div class="sdt-cell">🚗 AutoNova Group — Automotive</div><div class="sdt-cell">Table comments &amp; tags, ABAC policies, data retention, GDPR right-to-erasure, lineage tracking, audit logging, Delta Sharing</div><div class="sdt-cell"><span class="badge green">Available</span></div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">06</span>Design &amp; Implement Data Modelling</div><div class="sdt-cell">💹 FinServ Demo — Investment Banking</div><div class="sdt-cell">Ingestion patterns, Delta vs Parquet, partitioning, SCD Types 0–3, temporal history tables, granularity, liquid clustering</div><div class="sdt-cell"><span class="badge green">Available</span></div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">07</span>Ingest Data into Unity Catalog</div><div class="sdt-cell">🌿 GreenGrid Energy — Renewables</div><div class="sdt-cell">Lakeflow Connect, DataFrame ingestion, COPY INTO, CDC AUTO API, Structured Streaming (Event Hubs), Auto Loader, schema evolution</div><div class="sdt-cell"><span class="badge green">Available</span></div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">08</span>Cleanse, Transform &amp; Load</div><div class="sdt-cell">🏠 PropertyPro NL — Real Estate (Dutch)</div><div class="sdt-cell">Data profiling, type coercion, deduplication, null handling, joins, set operators, PIVOT/UNPIVOT, denormalisation, MERGE/INSERT</div><div class="sdt-cell"><span class="badge green">Available</span></div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">09</span>Data Quality Constraints</div><div class="sdt-cell">🛡️ InsureCo — Insurance Claims</div><div class="sdt-cell">Pipeline expectations (WARN/DROP/FAIL), type checks, TRY_CAST, schema drift detection, quarantine pattern, expectation metrics UI</div><div class="sdt-cell"><span class="badge green">Available</span></div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">10</span>Design &amp; Implement Data Pipelines</div><div class="sdt-cell">🏨 StayWell Hotels — Hospitality</div><div class="sdt-cell">Bronze/Silver/Gold pipeline design, notebook vs Lakeflow declarative, task DAG dependencies, error handling, retry logic, Lakeflow job creation</div><div class="sdt-cell"><span class="badge green">Available</span></div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">11</span>Implement Lakeflow Jobs</div><div class="sdt-cell">📡 NexaTel Communications — Telecom</div><div class="sdt-cell">Job creation &amp; DAG design, file arrival / table update / continuous triggers, cron scheduling, email/Slack/PagerDuty alerts, retry policies</div><div class="sdt-cell"><span class="badge green">Available</span></div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">12</span>Development Lifecycle Processes</div><div class="sdt-cell">General — DevOps &amp; CI/CD</div><div class="sdt-cell">Git integration, feature branching, PR workflow, conflict resolution, pytest unit/integration/UAT testing, Databricks Asset Bundles, CLI deploy</div><div class="sdt-cell"><span class="badge green">Available</span></div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">13</span>Monitor, Troubleshoot &amp; Optimise</div><div class="sdt-cell">General — Platform Operations</div><div class="sdt-cell">Cluster metrics, SQL warehouse monitoring, DBU budgets, system tables, Spark UI diagnostics, job failure states, repair runs, OOM &amp; skew resolution</div><div class="sdt-cell"><span class="badge green">Available</span></div></div>
     </div>
 
     <!-- Certification Tracker -->
@@ -2021,6 +2140,10 @@ button{font-family:var(--font);cursor:pointer;}
 
     <!-- Git -->
     <div class="wp-section-hd">🔀 Git Integration Model</div>
+    <div class="wp-alert info" style="margin-bottom:16px">
+      <span class="wp-alert-icon">⚙️</span>
+      <div class="wp-alert-body"><strong>Setup:</strong> Each developer links their own Git credential (Personal Access Token with <code>repo</code> scope) in Settings → Linked Accounts. PATs must never be shared across accounts. Then create a <strong>Git Folder</strong> from the workspace sidebar to clone the repository — the branch indicator on every notebook opens the Git dialog for commits, pushes, and conflict resolution.</div>
+    </div>
     <div class="wp-card-grid c3">
       <div class="sp-card"><div class="sp-card-icon ic-amber">🌿</div><div class="sp-card-title">Branch Strategy</div>
         <div style="font-size:12px;color:var(--n600);margin-top:8px;line-height:1.6">
@@ -2032,7 +2155,11 @@ button{font-family:var(--font);cursor:pointer;}
             feature/* ← developer branches<br>
             hotfix/* &nbsp;&nbsp;← prod fixes only
           </div>
-          <br>No direct commits to <code>main</code> or <code>develop</code>. All merges via PR. <code>main</code> merges require 1 peer review + CoE tech lead approval.
+          <br><strong>Branch naming patterns:</strong><br>
+          <code>feature/add-silver-layer</code><br>
+          <code>bugfix/fix-null-customer-id</code><br>
+          <code>users/jane/experiment-agg</code><br><br>
+          No direct commits to <code>main</code> or <code>develop</code>. All merges via PR. <code>main</code> merges require 1 peer review + CoE tech lead approval.
         </div>
       </div>
       <div class="sp-card"><div class="sp-card-icon ic-blue">🔎</div><div class="sp-card-title">PR Rules</div>
@@ -2045,6 +2172,7 @@ button{font-family:var(--font);cursor:pointer;}
           <div style="display:flex;gap:6px"><span style="color:var(--db-red)">✗</span>No secrets, credentials, or PATs in any commit</div>
           <div style="display:flex;gap:6px"><span style="color:var(--db-red)">✗</span>No hardcoded environment-specific values</div>
           <div style="display:flex;gap:6px"><span style="color:var(--db-red)">✗</span>No merge with failing tests or open Ruff violations</div>
+          <div style="margin-top:8px;font-size:11px;color:var(--n500)">Pull frequently from <code>main</code> to catch conflicts early — small merges are far easier to resolve than large ones.</div>
         </div>
       </div>
       <div class="sp-card"><div class="sp-card-icon ic-green">🏷️</div><div class="sp-card-title">Release Tagging</div>
@@ -2058,8 +2186,18 @@ button{font-family:var(--font);cursor:pointer;}
       </div>
     </div>
 
-    <!-- CI/CD Templates -->
-    <div class="wp-section-hd">🔄 CI/CD Pipeline Templates (Azure DevOps)</div>
+    <!-- Testing Strategy -->
+    <div class="wp-section-hd">🧪 Testing Strategy</div>
+    <div class="sp-doc-table" style="margin-bottom:24px">
+      <div class="sdt-header sdt-cols-4"><span>Test Type</span><span>What to Test</span><span>Tools</span><span>When to Run</span></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">🔬</span>Unit Tests</div><div class="sdt-cell">Transformation functions in <code>/src</code> using synthetic DataFrames — no production data required. Verify column logic, null handling, type coercion.</div><div class="sdt-cell"><code>pytest</code> + <code>chispa</code> for DataFrame equality assertions</div><div class="sdt-cell">On every commit — CI fails below 80% coverage</div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">🔗</span>Integration Tests</div><div class="sdt-cell">Read from dev Unity Catalog tables, validate schema and row counts after ingestion. Confirms the pipeline wrote data in the expected format.</div><div class="sdt-cell"><code>pytest</code> against dev catalog in a dedicated test schema</div><div class="sdt-cell">After deploy to dev — before staging gate</div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">✅</span>UAT / Business Tests</div><div class="sdt-cell">Validate pipeline outputs satisfy business rules — e.g. total revenue within tolerance range, KPI values match expected ranges, no data loss vs source.</div><div class="sdt-cell">Custom assertions in pytest or Great Expectations suite</div><div class="sdt-cell">After staging deploy — stakeholder sign-off required</div></div>
+      <div class="sdt-row sdt-cols-4"><div class="sdt-name"><span class="sdt-name-icon">⚡</span>Performance Tests</div><div class="sdt-cell">Pipeline completion time vs SLA, query response time for Gold tables, concurrent user load on SQL Warehouse.</div><div class="sdt-cell">Databricks Job metrics + <code>system.query.history</code> analysis</div><div class="sdt-cell">Pre-production — before Go-Live gate</div></div>
+    </div>
+
+    <!-- Asset Bundles -->
+    <div class="wp-section-hd">📦 Databricks Asset Bundles (DABs)</div>
     <div class="wp-card-grid c2">
       <div class="sp-card"><div class="sp-card-icon ic-blue">🏗️</div><div class="sp-card-title">Standard DAB Deployment Pipeline</div>
         <div style="font-family:monospace;font-size:11px;color:var(--n600);line-height:1.7;background:var(--n50);padding:12px;border-radius:var(--radius);margin-top:8px">
@@ -2079,6 +2217,28 @@ button{font-family:var(--font);cursor:pointer;}
         </div>
         <div class="sp-card-footer"><a class="sp-card-link" href="https://github.com/databricks/databricks-asset-bundles-dais2023" target="_blank">Copy Template →</a><span class="badge blue">YAML</span></div>
       </div>
+      <div class="sp-card"><div class="sp-card-icon ic-teal">📁</div><div class="sp-card-title">DAB Directory Structure</div>
+        <div style="font-family:monospace;font-size:11px;color:var(--n600);line-height:1.8;background:var(--n50);padding:12px;border-radius:var(--radius);margin-top:8px">
+          📁 my-pipeline/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;─ repo root<br>
+          ├── databricks.yml &nbsp;&nbsp;&nbsp;&lt;─ bundle identity + targets<br>
+          ├── resources/<br>
+          │&nbsp;&nbsp;&nbsp;└── jobs.yml &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;─ job &amp; pipeline definitions<br>
+          ├── src/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;─ Python modules<br>
+          │&nbsp;&nbsp;&nbsp;├── transforms.py<br>
+          │&nbsp;&nbsp;&nbsp;└── utils.py<br>
+          ├── notebooks/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;─ orchestration only<br>
+          │&nbsp;&nbsp;&nbsp;├── ingest.py<br>
+          │&nbsp;&nbsp;&nbsp;└── transform.py<br>
+          ├── tests/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;─ pytest unit tests<br>
+          └── requirements.txt
+        </div>
+        <div class="sp-card-footer"><a class="sp-card-link" href="https://docs.databricks.com/en/dev-tools/bundles/index.html" target="_blank">DAB Guide →</a></div>
+      </div>
+    </div>
+
+    <!-- CI/CD Templates -->
+    <div class="wp-section-hd">🔄 Additional CI/CD Pipeline Templates</div>
+    <div class="wp-card-grid c3">
       <div class="sp-card"><div class="sp-card-icon ic-teal">🏗️</div><div class="sp-card-title">Terraform Infrastructure Pipeline</div>
         <div style="font-family:monospace;font-size:11px;color:var(--n600);line-height:1.7;background:var(--n50);padding:12px;border-radius:var(--radius);margin-top:8px">
           Stage 1: Validate<br>
@@ -2222,6 +2382,137 @@ button{font-family:var(--font);cursor:pointer;}
       </div>
     </div>
 
+    <!-- Fine-Grained Access Control -->
+    <div class="wp-section-hd">🔬 Fine-Grained Access Control Patterns</div>
+    <div class="wp-alert info" style="margin-bottom:16px">
+      <span class="wp-alert-icon">💡</span>
+      <div class="wp-alert-body"><strong>CoE Standard:</strong> Prefer column masking + row filters directly on base tables over creating separate view objects. Fewer objects to govern, audit, and maintain. Use dynamic views only when security logic spans multiple tables or strict abstraction is required.</div>
+    </div>
+    <div class="wp-card-grid c2">
+      <div class="sp-card">
+        <div class="sp-card-icon ic-teal">🎭</div>
+        <div class="sp-card-title">Approach A — Column Masking &amp; Row Filters (Preferred)</div>
+        <div style="font-size:12px;color:var(--n600);line-height:1.6;margin-top:8px">
+          Masking functions and row filter functions are attached directly to sensitive tables. <strong>All queries automatically enforce the rules</strong> — no extra views or objects needed.<br><br>
+          <strong>How it works:</strong><br>
+          1. Create a SQL masking function that returns the real value when the caller is in the privileged group, otherwise returns a masked version<br>
+          2. Attach it to the column: <code>ALTER TABLE customers ALTER COLUMN email SET MASK mask_email_fn</code><br>
+          3. Create a row filter function using <code>is_account_group_member()</code><br>
+          4. Attach it to the table: <code>ALTER TABLE transactions SET ROW FILTER filter_by_region ON (region)</code><br><br>
+          <em>Masking is evaluated at query time — no data duplication required.</em>
+        </div>
+        <div class="sp-card-footer"><a class="sp-card-link" href="https://docs.databricks.com/en/data-governance/unity-catalog/row-and-column-filters.html" target="_blank">Masking Guide →</a><span class="badge green">Preferred</span></div>
+      </div>
+      <div class="sp-card">
+        <div class="sp-card-icon ic-indigo">👁️</div>
+        <div class="sp-card-title">Approach B — Dynamic Views (Abstraction Layer)</div>
+        <div style="font-size:12px;color:var(--n600);line-height:1.6;margin-top:8px">
+          Dynamic views embed security logic using <code>CASE WHEN is_account_group_member('finance_team') THEN email ELSE '***@***.com' END</code> inline. Consumers query the view; the source table is never directly exposed.<br><br>
+          <strong>When to use dynamic views:</strong><br>
+          • Security logic requires joining multiple tables<br>
+          • Organisational policy requires strict source-consumer separation<br>
+          • Legacy systems that cannot use MASKING POLICY syntax<br><br>
+          <strong>Trade-off:</strong> Additional object to govern, document, and maintain. Row and Column Security (Approach A) is simpler for single-table masking.
+        </div>
+        <div class="sp-card-footer"><a class="sp-card-link" href="https://docs.databricks.com/en/sql/language-manual/sql-ref-syntax-ddl-create-view.html" target="_blank">Views Guide →</a><span class="badge blue">Alternative</span></div>
+      </div>
+    </div>
+
+    <!-- UC Query Lifecycle -->
+    <div class="wp-section-hd">🔄 Unity Catalog Query Security Lifecycle</div>
+    <div class="sp-doc-table" style="margin-bottom:24px">
+      <div class="sdt-header sdt-cols-3"><span>Stage</span><span>What Happens</span><span>Security Control</span></div>
+      <div class="sdt-row sdt-cols-3"><div class="sdt-name"><span class="sdt-name-icon">1️⃣</span>Query Submitted</div><div class="sdt-cell">User or service principal submits query to cluster or SQL warehouse</div><div class="sdt-cell">AAD authentication — no local users permitted</div></div>
+      <div class="sdt-row sdt-cols-3"><div class="sdt-name"><span class="sdt-name-icon">2️⃣</span>Privilege Validation</div><div class="sdt-cell">Unity Catalog validates USE CATALOG → USE SCHEMA → SELECT privilege chain</div><div class="sdt-cell">Fail-fast if any privilege in the chain is missing — no partial access</div></div>
+      <div class="sdt-row sdt-cols-3"><div class="sdt-name"><span class="sdt-name-icon">3️⃣</span>Credential Scoping</div><div class="sdt-cell">UC generates a short-lived scoped token for the specific storage path</div><div class="sdt-cell">Managed identity — no long-lived credentials in code or config</div></div>
+      <div class="sdt-row sdt-cols-3"><div class="sdt-name"><span class="sdt-name-icon">4️⃣</span>Data Read</div><div class="sdt-cell">Data read from ADLS Gen2 using the scoped token</div><div class="sdt-cell">Private endpoint — no public internet data path</div></div>
+      <div class="sdt-row sdt-cols-3"><div class="sdt-name"><span class="sdt-name-icon">5️⃣</span>Filters Applied</div><div class="sdt-cell">Column masking and row filters evaluated on compute before results returned</div><div class="sdt-cell">Enforced even for cluster admins — masking is policy-level</div></div>
+      <div class="sdt-row sdt-cols-3"><div class="sdt-name"><span class="sdt-name-icon">6️⃣</span>Audit Written</div><div class="sdt-cell">Full audit event written to <code>system.access.audit</code> before result is returned</div><div class="sdt-cell">Immutable audit log — cannot be altered or deleted</div></div>
+    </div>
+
+    <!-- ABAC & Data Governance -->
+    <div class="wp-section-hd">🏷️ Attribute-Based Access Control (ABAC) &amp; Data Governance</div>
+    <div class="wp-card-grid c3">
+      <div class="sp-card">
+        <div class="sp-card-icon ic-amber">🏷️</div>
+        <div class="sp-card-title">Governed Tags for Classification</div>
+        <div style="font-size:12px;color:var(--n600);line-height:1.5;margin-top:8px">
+          Governed tags are defined in Account Console → Catalog → Governance → Governed Tags. Only admins can create tags; any user can apply pre-defined tags.<br><br>
+          <strong>Standard CoE tag taxonomy:</strong><br>
+          • <code>data_classification</code>: Public / Internal / Confidential / Restricted<br>
+          • <code>pii</code>: true / false<br>
+          • <code>retention_days</code>: 30 / 90 / 365 / 2555<br>
+          • <code>gdpr_subject</code>: true / false<br>
+          • <code>domain</code>: finance / hr / operations / customer<br><br>
+          Tags drive ABAC policies — masking rules fire based on tag values, not hard-coded column names.
+        </div>
+        <div class="sp-card-footer"><a class="sp-card-link" href="https://docs.databricks.com/en/data-governance/unity-catalog/tags.html" target="_blank">Tags Guide →</a><span class="badge amber">Standard</span></div>
+      </div>
+      <div class="sp-card">
+        <div class="sp-card-icon ic-teal">📈</div>
+        <div class="sp-card-title">Data Lineage Tracking</div>
+        <div style="font-size:12px;color:var(--n600);line-height:1.5;margin-top:8px">
+          Unity Catalog captures lineage automatically for all queries run on UC-enabled compute. Column-level lineage tracks exactly which source columns feed which derived columns — visible in Catalog Explorer → Lineage tab.<br><br>
+          <strong>Lineage system tables:</strong><br>
+          • <code>system.access.table_lineage</code> — upstream/downstream table relationships<br>
+          • <code>system.access.column_lineage</code> — column-level flow tracking<br><br>
+          Use lineage for: impact analysis before schema changes, regulatory data flow documentation, and identifying all downstream consumers before a table is deprecated.
+        </div>
+        <div class="sp-card-footer"><a class="sp-card-link" href="https://docs.databricks.com/en/data-governance/unity-catalog/data-lineage.html" target="_blank">Lineage Guide →</a><span class="badge teal">Auto-Captured</span></div>
+      </div>
+      <div class="sp-card">
+        <div class="sp-card-icon ic-blue">🔍</div>
+        <div class="sp-card-title">Audit Log Analysis</div>
+        <div style="font-size:12px;color:var(--n600);line-height:1.5;margin-top:8px">
+          <code>system.access.audit</code> captures every access event. Key queries run by the Security team:<br><br>
+          <strong>1. Who accessed PII data?</strong><br>
+          Filter <code>actionName = 'getTable'</code> and join with classification tags<br><br>
+          <strong>2. Permission changes:</strong><br>
+          Filter <code>actionName IN ('grantPrivilege', 'revokePrivilege')</code><br><br>
+          <strong>3. Failed access attempts:</strong><br>
+          Filter <code>statusCode != 200</code> with multiple failures per user in 1 hour<br><br>
+          Monthly access review report auto-generated on the 1st of each month.
+        </div>
+        <div class="sp-card-footer"><a class="sp-card-link" href="https://docs.databricks.com/en/administration-guide/account-settings/audit-logs.html" target="_blank">Audit Guide →</a><span class="badge blue">Compliance</span></div>
+      </div>
+    </div>
+
+    <!-- Delta Sharing -->
+    <div class="wp-section-hd">🌐 Secure Delta Sharing</div>
+    <div class="wp-card-grid c2">
+      <div class="sp-card">
+        <div class="sp-card-icon ic-green">📤</div>
+        <div class="sp-card-title">Delta Sharing — Partner &amp; Internal Distribution</div>
+        <div style="font-size:12px;color:var(--n600);line-height:1.5;margin-top:8px">
+          Delta Sharing provides read-only, governed access to Delta tables across organisational boundaries — no data duplication.<br><br>
+          <strong>CoE use cases:</strong><br>
+          • Share aggregated Gold data with partner organisations (e.g. dealer networks, regulators)<br>
+          • Cross-business-unit data sharing within the same Azure tenant<br>
+          • DR region read access via UK West metastore<br><br>
+          <strong>Key principles:</strong><br>
+          • Share <em>views</em> not raw tables — apply masking in the view definition before sharing<br>
+          • Databricks-to-Databricks recipients: managed via Unity Catalog recipient objects<br>
+          • Monitor share access via <code>system.access.audit</code> actionName = 'deltaSharing*'
+        </div>
+        <div class="sp-card-footer"><a class="sp-card-link" href="https://docs.databricks.com/en/delta-sharing/index.html" target="_blank">Delta Sharing Guide →</a><span class="badge green">Approved Pattern</span></div>
+      </div>
+      <div class="sp-card">
+        <div class="sp-card-icon ic-red">🔑</div>
+        <div class="sp-card-title">Managed Identity vs Service Principal</div>
+        <div style="font-size:12px;color:var(--n600);line-height:1.5;margin-top:8px">
+          For Unity Catalog storage credentials, <strong>managed identities are mandatory</strong> in production.<br><br>
+          <table style="width:100%;font-size:11px;border-collapse:collapse">
+            <tr><th style="text-align:left;padding:3px 6px;border-bottom:1px solid var(--n200)"></th><th style="padding:3px 6px;border-bottom:1px solid var(--n200)">Managed Identity</th><th style="padding:3px 6px;border-bottom:1px solid var(--n200)">Service Principal</th></tr>
+            <tr><td style="padding:3px 6px;color:var(--n600)">Credential rotation</td><td style="padding:3px 6px;text-align:center">✅ Automatic</td><td style="padding:3px 6px;text-align:center">❌ Manual</td></tr>
+            <tr><td style="padding:3px 6px;color:var(--n600)">Network-restricted ADLS</td><td style="padding:3px 6px;text-align:center">✅ Supported</td><td style="padding:3px 6px;text-align:center">❌ Not supported</td></tr>
+            <tr><td style="padding:3px 6px;color:var(--n600)">Secret management</td><td style="padding:3px 6px;text-align:center">✅ None needed</td><td style="padding:3px 6px;text-align:center">⚠️ AKV required</td></tr>
+          </table>
+          <br>Service principals are still used for: CI/CD pipelines, cross-tenant API access, and ADF linked services.
+        </div>
+        <div class="sp-card-footer"><a class="sp-card-link" href="https://docs.databricks.com/en/connect/storage/azure-storage.html" target="_blank">Auth Guide →</a><span class="badge red">Mandatory in Prod</span></div>
+      </div>
+    </div>
+
     <!-- Compliance -->
     <div class="wp-section-hd">✅ Compliance &amp; GDPR</div>
     <div class="wp-card-grid c3">
@@ -2252,6 +2543,49 @@ button{font-family:var(--font);cursor:pointer;}
       <div class="stat-tile"><div class="stat-tile-val brand">30 min</div><div class="stat-tile-label">P1 Response SLA</div></div>
       <div class="stat-tile"><div class="stat-tile-val amber">3</div><div class="stat-tile-label">Open P2 Incidents</div></div>
       <div class="stat-tile"><div class="stat-tile-val info">142</div><div class="stat-tile-label">Tickets Resolved (Mar)</div></div>
+    </div>
+
+    <!-- Job Failure States -->
+    <div class="wp-section-hd">🚦 Lakeflow Job Failure States</div>
+    <div class="sp-doc-table" style="margin-bottom:24px">
+      <div class="sdt-header sdt-cols-3"><span>State</span><span>Meaning</span><span>First Action</span></div>
+      <div class="sdt-row sdt-cols-3"><div class="sdt-name"><span class="sdt-name-icon">🔴</span>Failed</div><div class="sdt-cell">One or more leaf tasks didn't complete successfully</div><div class="sdt-cell">Click failed task → inspect error + Diagnose Error (Assistant)</div></div>
+      <div class="sdt-row sdt-cols-3"><div class="sdt-name"><span class="sdt-name-icon">🟡</span>Succeeded with Failures</div><div class="sdt-cell">Some tasks failed but all leaf tasks completed (conditional path ran)</div><div class="sdt-cell">Check matrix view — identify which optional branch triggered</div></div>
+      <div class="sdt-row sdt-cols-3"><div class="sdt-name"><span class="sdt-name-icon">⏭️</span>Skipped</div><div class="sdt-cell">Job exceeded maximum concurrent runs limit</div><div class="sdt-cell">Increase max concurrent runs or investigate why previous run is still active</div></div>
+      <div class="sdt-row sdt-cols-3"><div class="sdt-name"><span class="sdt-name-icon">⏱️</span>Timed Out</div><div class="sdt-cell">Job exceeded configured maximum duration threshold</div><div class="sdt-cell">Check Spark UI for long-running stage — data skew or OOM common causes</div></div>
+      <div class="sdt-row sdt-cols-3"><div class="sdt-name"><span class="sdt-name-icon">🛑</span>Canceled</div><div class="sdt-cell">Stopped by user or automated process</div><div class="sdt-cell">Check if automated cancellation was intentional (cost alert threshold)</div></div>
+    </div>
+
+    <!-- Repair Runs -->
+    <div class="wp-section-hd">🔧 Repairing Failed Job Runs</div>
+    <div class="wp-card-grid c2" style="margin-bottom:24px">
+      <div class="sp-card">
+        <div class="sp-card-icon ic-green">🔧</div>
+        <div class="sp-card-title">Repair Run (Re-run Failed Tasks Only)</div>
+        <div style="font-size:12px;color:var(--n600);line-height:1.6;margin-top:8px">
+          <strong>Steps:</strong><br>
+          1. Runs tab → click the failed run in the Start Time column<br>
+          2. Click <strong>Repair run</strong> (top-right corner)<br>
+          3. Review the list of tasks that will re-run (failed tasks + their dependents)<br>
+          4. Optionally modify task parameters in the repair dialog<br>
+          5. Click <strong>Repair run</strong> — only failed tasks re-run, saving time and cost<br><br>
+          <strong>Key constraints:</strong><br>
+          • Repair is only available for jobs with 2 or more tasks<br>
+          • The matrix view adds a new column after repair completes<br>
+          • Pattern: same task fails repeatedly = code issue; random failures = cluster/resource problem
+        </div>
+        <div class="sp-card-footer"><a class="sp-card-link" href="https://docs.databricks.com/en/workflows/jobs/repair-job-failures.html" target="_blank">Repair Guide →</a><span class="badge green">Save Compute</span></div>
+      </div>
+      <div class="sp-card">
+        <div class="sp-card-icon ic-amber">🔁</div>
+        <div class="sp-card-title">Retry Policies &amp; Continuous Job Restart</div>
+        <div style="font-size:12px;color:var(--n600);line-height:1.6;margin-top:8px">
+          <strong>Task-level retry:</strong> Max 3 retries with 60-second interval between attempts for transient failures (network timeouts, Delta lock contention). Interval = ms from start of failed run to start of retry.<br><br>
+          <strong>Timeout thresholds:</strong> Set Warning duration (e.g. 30 min) and Timeout (e.g. 60 min). A timeout terminates the task and counts as one retry attempt.<br><br>
+          <strong>Continuous job restart:</strong> For streaming jobs, use <strong>Restart run</strong> to bypass exponential backoff after repeated failures. Enable <em>Task retry mode: On failure</em> for fraud detection / mission-critical streaming jobs.
+        </div>
+        <div class="sp-card-footer"><a class="sp-card-link" href="https://docs.databricks.com/en/workflows/jobs/configure-error-handling.html" target="_blank">Retry Guide →</a></div>
+      </div>
     </div>
 
     <!-- Runbooks -->
@@ -2312,11 +2646,49 @@ button{font-family:var(--font);cursor:pointer;}
       </div>
     </div>
 
+    <!-- Spark UI Guide -->
+    <div class="wp-section-hd">🔍 Spark UI — Diagnosing Resource Bottlenecks</div>
+    <div class="wp-card-grid c2" style="margin-bottom:24px">
+      <div class="sp-card">
+        <div class="sp-card-icon ic-indigo">📈</div>
+        <div class="sp-card-title">Reading the Spark UI</div>
+        <div style="font-size:12px;color:var(--n600);line-height:1.6;margin-top:8px">
+          <strong>Navigate:</strong> Compute → Your Cluster → Spark UI tab → Jobs page<br><br>
+          <strong>Three patterns to look for in the Jobs Timeline:</strong><br>
+          • <strong>Red/failed jobs</strong> — click to see the failed stage and exception<br>
+          • <strong>Single long-running job</strong> dominating the timeline — check its stages for skew<br>
+          • <strong>Gaps with no Spark activity</strong> — driver may be overloaded (Python, pandas, collect())<br><br>
+          <strong>In Stage detail — Summary Metrics to check:</strong><br>
+          • Input/Output: data read/written per task<br>
+          • Shuffle Read/Write: high values = data movement bottleneck<br>
+          • Task duration distribution: <em>outlier tasks = data skew</em><br><br>
+          <strong>Key signals:</strong> 1 task in a stage = insufficient parallelism. Uneven task durations = data skew.
+        </div>
+        <div class="sp-card-footer"><a class="sp-card-link" href="https://docs.databricks.com/en/compute/debugging.html" target="_blank">Spark UI Guide →</a></div>
+      </div>
+      <div class="sp-card">
+        <div class="sp-card-icon ic-red">⚠️</div>
+        <div class="sp-card-title">Resource Bottleneck Fixes</div>
+        <div style="font-size:12px;color:var(--n600);line-height:1.6;margin-top:8px">
+          <strong>Memory pressure (Shuffle Spill &gt; 0):</strong><br>
+          Increase worker sizes, reduce partition count, or refactor to avoid wide transformations<br><br>
+          <strong>CPU constraints (high utilisation + long tasks):</strong><br>
+          Enable Photon for SQL/DataFrame ops; add worker nodes<br><br>
+          <strong>Network bottleneck (large Shuffle Read/Write):</strong><br>
+          Filter data earlier in the pipeline; use broadcast joins; avoid unnecessary repartitions<br><br>
+          <strong>Driver overloaded (Metrics → Server Load red driver, blue workers):</strong><br>
+          Replace <code>.collect()</code> / <code>.toPandas()</code> with distributed operations; increase driver instance size<br><br>
+          <strong>Autoscaling savings:</strong> Typical 20–40% DBU reduction vs fixed-size clusters.
+        </div>
+        <div class="sp-card-footer"><a class="sp-card-link" href="https://docs.databricks.com/en/optimizations/index.html" target="_blank">Optimisation Guide →</a></div>
+      </div>
+    </div>
+
     <!-- Monitoring -->
     <div class="wp-section-hd">📡 Monitoring Templates &amp; Alert Thresholds</div>
     <div class="wp-card-grid c3">
       <div class="sp-card"><div class="sp-card-icon ic-blue">📊</div><div class="sp-card-title">Standard Dashboards</div><div class="sp-card-desc">Pre-built Azure Monitor Workbooks (importable JSON):<br><br><strong>1. Platform Health Dashboard:</strong> Cluster launch success rate, job success/failure rate (24hr), workspace active users, DLT pipeline health status.<br><strong>2. Cost Dashboard:</strong> DBU burn rate vs daily budget by team, cost by cluster type, spot vs on-demand split.<br><strong>3. Data Quality Dashboard:</strong> DQ expectation pass/fail rate by pipeline, quarantine record count trend.</div><div class="sp-card-footer"><a class="sp-card-link" href="https://learn.microsoft.com/en-us/azure/azure-monitor/visualize/workbooks-overview" target="_blank">Import Dashboards →</a></div></div>
-      <div class="sp-card"><div class="sp-card-icon ic-teal">📡</div><div class="sp-card-title">Log Analytics Integration</div><div class="sp-card-desc">Databricks audit logs streamed to Log Analytics workspace via Diagnostic Settings. Key log tables in LA: <code>DatabricksAccounts</code>, <code>DatabricksClusters</code>, <code>DatabricksJobs</code>, <code>DatabricksNotebook</code>, <code>DatabricksSQLPermissions</code>. KQL query library of 20+ operational queries available in the CoE GitHub repo. Custom Workbooks built on top of these queries for Security and Ops teams.</div><div class="sp-card-footer"><a class="sp-card-link" href="https://docs.databricks.com/en/administration-guide/account-settings/audit-logs.html" target="_blank">KQL Library →</a></div></div>
+      <div class="sp-card"><div class="sp-card-icon ic-teal">📡</div><div class="sp-card-title">System Tables for Monitoring</div><div class="sp-card-desc">Key Unity Catalog system tables for operational monitoring:<br><br>• <code>system.billing.usage</code> — DBU consumption per cluster, job, SKU<br>• <code>system.compute.clusters</code> — cluster metadata including owner and tags<br>• <code>system.lakeflow.job_run_timeline</code> — job run history for cross-workspace dashboards<br>• <code>system.access.audit</code> — all access events<br>• <code>system.query.history</code> — SQL warehouse query performance<br><br>Join billing + compute tables with tags (<code>business_unit</code>, <code>project</code>, <code>environment</code>) for accurate team-level chargeback.</div><div class="sp-card-footer"><a class="sp-card-link" href="https://docs.databricks.com/en/administration-guide/system-tables/index.html" target="_blank">System Tables Guide →</a></div></div>
       <div class="sp-card"><div class="sp-card-icon ic-amber">🚨</div><div class="sp-card-title">Alert Thresholds</div>
         <div class="sp-doc-table" style="margin-top:10px">
           <div class="sdt-header sdt-cols-3"><span>Alert</span><span>Threshold</span><span>Priority</span></div>
